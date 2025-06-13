@@ -163,4 +163,3 @@ async def handle_visualization_request(
         "numeric_columns": numeric_cols,
         "plots": plots
     })
-    #dff
