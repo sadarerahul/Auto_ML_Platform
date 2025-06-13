@@ -162,4 +162,6 @@ async def handle_visualization_request(
         "page": "visualize",
         "numeric_columns": numeric_cols,
         "plots": plots
+
+        ##Rahul_work
     })
