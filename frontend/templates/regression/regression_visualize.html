@@ -1,0 +1,80 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<div class="card bg-dark border-secondary shadow-sm">
+  <div class="card-body">
+    <h4 class="card-title text-info">📊 Visualize Your Data</h4>
+    <p class="text-muted">Choose up to 2 numeric columns and the type of plots you'd like to generate.</p>
+
+    <form method="post" action="/regression/visualize">
+      <div class="row g-4">
+
+        <!-- Column Selection -->
+        <div class="col-md-4">
+          <label class="form-label">Select up to 2 Columns</label>
+          {% for col in numeric_columns %}
+            <div class="form-check">
+              <input class="form-check-input column-checkbox" type="checkbox" name="selected_columns" value="{{ col }}">
+              <label class="form-check-label">{{ col }}</label>
+            </div>
+          {% endfor %}
+          <small class="text-muted d-block mt-2">Selected columns will define plot axes.</small>
+        </div>
+
+        <!-- Plot Types -->
+        <div class="col-md-4">
+          <label class="form-label">Select Plot Types</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="plot_types" value="scatter">
+            <label class="form-check-label">Scatter Plot</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="plot_types" value="histogram">
+            <label class="form-check-label">Histogram</label>
+          </div>
+          <!--<div class="form-check">
+            <input class="form-check-input" type="checkbox" name="plot_types" value="box">
+            <label class="form-check-label">Box Plot</label>
+          </div> -->
+        </div>
+
+        <!-- Optional Scatter Limit -->
+        <div class="col-md-4">
+          <label for="scatter_limit" class="form-label">Limit (for Scatter Plot)</label>
+          <input type="number" class="form-control" name="scatter_limit" value="100" min="10" step="10">
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="mt-4">
+        <button class="btn btn-outline-info" type="submit">Generate Visualizations</button>
+      </div>
+    </form>
+
+    <!-- Rendered Plot Outputs -->
+    {% if plots %}
+      <hr class="my-4 border-light">
+      <h5 class="text-light mb-3">🖼️ Generated Visualizations</h5>
+      {% for plot_html in plots %}
+        <div class="mb-4">
+          {{ plot_html | safe }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+<!-- JS: Limit column selection to max 2 -->
+<script>
+  const checkboxes = document.querySelectorAll('.column-checkbox');
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checked = document.querySelectorAll('.column-checkbox:checked');
+      if (checked.length > 2) {
+        cb.checked = false;
+        alert("You can only select up to 2 columns.");
+      }
+    });
+  });
+</script>
+{% endblock %}

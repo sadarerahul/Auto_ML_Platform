@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Regression Workflow - RPDS{% endblock %}
+
+{% block content %}
+<div class="row">
+  <!-- 📚 Sidebar Navigation -->
+  <div class="col-md-3 mb-4">
+    <div class="list-group custom-sticky-sidebar shadow-sm rounded-3">
+      <a href="/regression/upload"
+         class="list-group-item list-group-item-action {% if page == 'upload' %}active{% endif %}">
+        <i class="fas fa-upload me-2"></i>1️⃣ Upload Data
+      </a>
+      <a href="/regression/clean"
+         class="list-group-item list-group-item-action {% if page == 'clean' %}active{% endif %}">
+        <i class="fas fa-broom me-2"></i> 2️⃣Clean Data
+      </a>
+      <a href="/regression/visualize"
+         class="list-group-item list-group-item-action {% if page == 'visualize' %}active{% endif %}">
+        <i class="fas fa-chart-bar me-2"></i>3️⃣ Data Visualize
+      </a>
+      <a href="/regression/model"
+         class="list-group-item list-group-item-action {% if page == 'model' %}active{% endif %}">
+        <i class="fas fa-cogs me-2"></i>4️⃣ Select Model
+      </a>
+      <a href="/regression/train"
+         class="list-group-item list-group-item-action {% if page == 'train' %}active{% endif %}">
+        <i class="fas fa-play-circle me-2"></i>5️⃣ Train & Evaluate
+      </a>
+      <a href="/regression/predict"
+         class="list-group-item list-group-item-action {% if page == 'predict' %}active{% endif %}">
+        <i class="fas fa-magic me-2"></i>6️⃣ Predict New Data
+      </a>
+      <a href="/regression/results"
+         class="list-group-item list-group-item-action {% if page == 'results' %}active{% endif %}">
+        <i class="fas fa-chart-line me-2"></i>7️⃣ Visualize Results
+      </a>
+    </div>
+  </div>
+
+  <!-- 🎯 Main Content Panel -->
+  <div class="col-md-9">
+    <div class="card bg-dark text-light border-secondary shadow-lg">
+      <div class="card-body">
+        <h4 class="card-title text-info mb-3">
+          <i class="fas fa-project-diagram me-2"></i>Regression Workflow
+        </h4>
+        <p class="text-muted mb-4">
+          This workflow guides you through a complete regression pipeline — from data upload to prediction and visualization.
+        </p>
+
+        <!-- 🔄 Dynamic Progress Tracker -->
+        {% set total_steps = 7 %}
+        {% set step_names = {
+          "upload": 1, "clean": 2, "visualize": 3, "model": 4,
+          "train": 5, "predict": 6, "results": 7
+        } %}
+        {% set current_step = step_names.get(page, 1) %}
+        {% set progress_percent = (current_step / total_steps * 100) | round(0, 'ceil') %}
+
+        <div class="progress mb-4" role="progressbar" style="height: 18px;">
+          <div class="progress-bar bg-info" style="width: {{ progress_percent }}%;">
+            Step {{ current_step }} of {{ total_steps }}
+          </div>
+        </div>
+
+        <!-- 🔧 Dynamic Workflow Content -->
+        <div id="regression-content">
+          {% block regression_content %}
+          <p class="text-muted">Select a step from the sidebar to begin.</p>
+          {% endblock %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

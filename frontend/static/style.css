@@ -1,0 +1,139 @@
+/* ---------------------------------------------------
+   style.css - Custom Styles for RPDS Platform (Dark Theme)
+   --------------------------------------------------- */
+
+/* Global Reset and Font */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
+    color: #f0f0f0;
+    line-height: 1.6;
+    margin: 0;
+}
+
+
+.navbar-brand,
+.nav-link {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #fff;
+}
+
+.nav-link:hover {
+    color: #d1d1d1 !important;
+}
+
+/* Hero Section */
+.hero {
+    background: url('https://images.unsplash.com/photo-1665686302311-fc5b8574258b?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat;
+    height: 90vh;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+}
+
+.hero .lead {
+    font-size: 1.25rem;
+    color: #e0e0e0;
+}
+
+/* Animation */
+.fade-in {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+/* Footer */
+footer {
+    background-color: #1e1e1e;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #aaa;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #fff;
+}
+
+.footer-link {
+    display: block;
+    margin: 4px 0;
+}
+
+/* Buttons */
+.btn-outline-info:hover {
+    background-color: #0dcaf0;
+    color: #000;
+}
+
+/* Utility Classes */
+.text-info {
+    color: #0dcaf0 !important;
+}
+
+.bg-black {
+    background-color: #000 !important;
+}
+
+.border-info {
+    border-color: #0dcaf0 !important;
+}
+
+.border-success {
+    border-color: #198754 !important;
+}
+
+.border-warning {
+    border-color: #ffc107 !important;
+}
+
+.list-group-item-action {
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.list-group-item-action:hover {
+  transform: scale(1.01);
+  background-color: #0d6efd20;
+}
+
+.list-group-item.active {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+  font-weight: 600;
+}
+
+.progress {
+  background-color: #2e2e2e;
+}
+
+.progress-bar {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
