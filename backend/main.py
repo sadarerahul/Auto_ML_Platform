@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request
+from fastapi import FastAPI, File, UploadFile, Form, Request, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -61,23 +61,32 @@ async def regression_upload_page(request: Request):
 @app.post("/regression/upload", response_class=HTMLResponse)
 async def handle_upload(
     request: Request,
-    file: UploadFile = File(...),
-    file_type: str = Form(...)
+    file: UploadFile = File(...)
 ):
-    df, message = save_uploaded_file(file.file, file_type)
-    if df is not None:
-        return templates.TemplateResponse("regression/regression_upload.html", {
-            "request": request,
-            "page": "upload",
-            "message": message,
-            "columns": df.columns.tolist(),
-        })
+    filename = file.filename.lower()
+
+    if filename.endswith(".csv"):
+        file_type = "csv"
+    elif filename.endswith(".xls") or filename.endswith(".xlsx"):
+        file_type = "excel"
     else:
         return templates.TemplateResponse("regression/regression_upload.html", {
             "request": request,
             "page": "upload",
-            "message": message
+            "message": "❌ Unsupported file format"
         })
+
+    # Save file and get DataFrame
+    df, message = save_uploaded_file(file.file, file_type)
+
+    # Return template with result
+    return templates.TemplateResponse("regression/regression_upload.html", {
+        "request": request,
+        "page": "upload",
+        "message": message,
+        "columns": df.columns.tolist() if df is not None else None
+    })
+    
 
 # Handle Table Preview (Only Showing Table)
 @app.post("/regression/preview", response_class=HTMLResponse)

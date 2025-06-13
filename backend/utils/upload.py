@@ -22,11 +22,11 @@ def save_uploaded_file(file, file_type="csv"):
         if file_type == "csv":
             df = pd.read_csv(file)
         elif file_type == "excel":
-            df = pd.read_excel(file)
+            df = pd.read_excel(file, engine='openpyxl')  # <-- force openpyxl engine
         else:
             raise ValueError("Unsupported file format")
 
-        df.to_csv(DATA_PATH, index=False)  # Standardize save as CSV
+        df.to_csv(DATA_PATH, index=False)  # Save as CSV
         return df, "✅ File uploaded successfully!"
     except Exception as e:
         return None, f"❌ Error: {str(e)}"
