@@ -5,7 +5,11 @@
 {% block content %}
 <div class="row">
   <!-- 📚 Sidebar Navigation -->
+<<<<<<< HEAD
   <!-- 📚 Sidebar Navigation -->
+=======
+
+>>>>>>> bad0bd1cbe0a09031620af5eff727a581edc51d2
 <div class="col-md-3 mb-4">
   <div class="list-group custom-sticky-sidebar shadow-sm rounded-3">
 
@@ -100,9 +104,10 @@
         {% set progress_percent = (current_step / total_steps * 100) | round(0, 'ceil') %}
 
         <div class="progress mb-4" role="progressbar" style="height: 18px;">
-          <!-- {% raw %}<div class="progress-bar bg-info" style="width: {{ progress_percent }}%;">{% endraw %} -->
-            Step {{ current_step }} of {{ total_steps }}
+          <div class="progress-bar bg-info" style="width: {{ progress_percent }}%;">
+          Step {{ current_step }} of {{ total_steps }}
           </div>
+          
         </div>
 
         <!-- 🔧 Dynamic Workflow Content -->
