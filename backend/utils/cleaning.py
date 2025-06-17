@@ -1,93 +1,84 @@
-import os
 import pandas as pd
+from .paths import DATA_PATH
 
-# Paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "../../frontend/static/uploads")
-DATA_PATH = os.path.join(UPLOAD_DIR, "uploaded_data.csv")
-CLEANED_DATA_PATH = os.path.join(UPLOAD_DIR, "cleaned_data.csv")
+# internal cache (None until first request)
+_CURRENT_DF = None
 
-# Ensure upload folder exists
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+def _load_df():
+    """Return the latest DataFrame in memory; read from disk if needed."""
+    global _CURRENT_DF
+    if _CURRENT_DF is None:
+        _CURRENT_DF = pd.read_csv(DATA_PATH)
+    return _CURRENT_DF
 
-# 🔄 Load data (auto-load cleaned if exists)
-def load_data():
-    if os.path.exists(CLEANED_DATA_PATH):
-        return pd.read_csv(CLEANED_DATA_PATH)
-    elif os.path.exists(DATA_PATH):
-        return pd.read_csv(DATA_PATH)
-    else:
-        return pd.DataFrame()
+def _set_current_df(df):
+    """Called by upload.py right after a new file is saved."""
+    global _CURRENT_DF
+    _CURRENT_DF = df.copy()
 
-# 📦 Save cleaned data
-def save_data(df):
-    df.to_csv(CLEANED_DATA_PATH, index=False)
-
-# 🧼 Get columns with missing values
+# ---------- public helpers ----------
 def get_missing_columns():
-    df = load_data()
-    return df.columns[df.isnull().any()].tolist()
+    try:
+        df = _load_df()
+        return df.columns[df.isna().any()].tolist()
+    except Exception:
+        return []
 
-# 📈 Get categorical columns
 def get_categorical_columns():
-    df = load_data()
-    return df.select_dtypes(include="object").columns.tolist()
+    try:
+        df = _load_df()
+        return df.select_dtypes(include=["object", "category"]).columns.tolist()
+    except Exception:
+        return []
 
-# ✅ Apply missing value treatment
-def apply_missing_value_strategy(column, strategy, custom_value=None):
-    df = load_data()
+def apply_missing_value_strategy(column, strategy, custom):
+    df = _load_df()
     if column not in df.columns:
-        return False, f"⚠️ Column '{column}' not found."
+        return False, "❌ Column not found"
 
     if strategy == "drop":
-        df = df.dropna(subset=[column])
-        msg = f"🗑️ Dropped rows where '{column}' is missing."
+        df.dropna(subset=[column], inplace=True)
     elif strategy == "mean":
-        mean_val = df[column].mean()
-        df[column] = df[column].fillna(mean_val)
-        msg = f"📊 Filled missing '{column}' with mean: {mean_val:.2f}"
+        df[column].fillna(df[column].mean(), inplace=True)
     elif strategy == "median":
-        median_val = df[column].median()
-        df[column] = df[column].fillna(median_val)
-        msg = f"📐 Filled missing '{column}' with median: {median_val:.2f}"
+        df[column].fillna(df[column].median(), inplace=True)
     elif strategy == "mode":
-        mode_val = df[column].mode()[0]
-        df[column] = df[column].fillna(mode_val)
-        msg = f"🎯 Filled missing '{column}' with mode: {mode_val}"
-    elif strategy == "custom" and custom_value is not None:
-        df[column] = df[column].fillna(custom_value)
-        msg = f"✍️ Filled missing '{column}' with custom value: {custom_value}"
+        df[column].fillna(df[column].mode()[0], inplace=True)
+    elif strategy == "custom":
+        df[column].fillna(custom, inplace=True)
     else:
-        return False, "❌ Invalid strategy or missing custom value."
+        return False, "❌ Unknown strategy"
 
-    save_data(df)
-    return True, msg
+    df.to_csv(DATA_PATH, index=False)
+    _set_current_df(df)
+    return True, "✅ Missing‑value handling applied"
 
-# 🔠 Apply encoding strategy
-def apply_encoding(column, encoding_type):
-    df = load_data()
-
+def apply_encoding(column, strategy):
+    df = _load_df()
     if column not in df.columns:
-        return False, f"⚠️ Column '{column}' not found."
+        return False, "❌ Column not found"
 
-    if encoding_type == "label":
-        df[column] = df[column].astype("category").cat.codes
-        msg = f"🔢 Applied label encoding to '{column}'"
-    elif encoding_type == "onehot":
-        onehot_df = pd.get_dummies(df[column], prefix=column)
-        df = pd.concat([df.drop(columns=[column]), onehot_df], axis=1)
-        msg = f"🌈 Applied one-hot encoding to '{column}'"
-    elif encoding_type == "frequency":
-        freq_map = df[column].value_counts().to_dict()
-        df[column] = df[column].map(freq_map)
-        msg = f"📊 Applied frequency encoding to '{column}'"
+    if strategy == "onehot":
+        df = pd.get_dummies(df, columns=[column])
+    elif strategy == "label":
+        from sklearn.preprocessing import LabelEncoder
+        le = LabelEncoder()
+        df[column] = le.fit_transform(df[column].astype(str))
+    elif strategy == "freq":
+        freq = df[column].value_counts() / len(df)
+        df[column] = df[column].map(freq)
     else:
-        return False, "❌ Invalid encoding type."
+        return False, "❌ Unknown encoding"
 
-    save_data(df)
-    return True, msg
+    df.to_csv(DATA_PATH, index=False)
+    _set_current_df(df)
+    return True, "✅ Encoding applied"
 
-# 📋 Return summary of cleaned data (used for preview)
 def get_cleaned_data_preview(n=10):
-    df = load_data()
-    return df.head(n).to_html(classes="table table-sm table-bordered", index=False)
+    try:
+        return _load_df().head(n).to_html(
+            classes="table table-striped table-bordered",
+            index=False
+        )
+    except Exception as exc:
+        return f"<p class='text-danger'>❌ Preview failed: {exc}</p>"

@@ -1,4 +1,6 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request
+# top of file – remove duplicates
+from fastapi import FastAPI, File, UploadFile, Request, Form
+
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -7,8 +9,11 @@ import os
 
 
 # Import logic from utils
+from uuid import uuid4          # NEW
 from utils.upload import (
     save_uploaded_file,
+    list_saved_datasets,        # NEW
+    delete_saved_dataset,       # NEW
     get_column_names,
     get_head_as_html,
     preview_uploaded_data
@@ -54,32 +59,108 @@ async def regression_workflow(request: Request):
 # Regression Upload Page (GET)
 @app.get("/regression/upload", response_class=HTMLResponse)
 async def regression_upload_page(request: Request):
-    return templates.TemplateResponse("regression/regression_upload.html", {
-        "request": request,
-        "page": "upload"
-    })
+    cols = get_column_names()
+    preview = get_head_as_html(10) if cols else None
 
+    return templates.TemplateResponse(
+        "regression/regression_upload.html",
+        {
+            "request": request,
+            "page": "upload",
+            "columns": cols,
+            "preview_table": preview,
+            "datasets": list_saved_datasets(),
+            "show_delete": False
+        }
+    )
 # Handle Upload Form (POST)
 @app.post("/regression/upload", response_class=HTMLResponse)
-async def handle_upload(
-    request: Request,
-    file: UploadFile = File(...),
-    file_type: str = Form(...)
-):
-    df, message = save_uploaded_file(file.file, file_type)
-    if df is not None:
-        return templates.TemplateResponse("regression/regression_upload.html", {
-            "request": request,
-            "page": "upload",
-            "message": message,
-            "columns": df.columns.tolist(),
-        })
+async def handle_upload(request: Request, file: UploadFile = File(...)):
+    # block if >=5 datasets
+    datasets = list_saved_datasets()
+    if len(datasets) >= 5:
+        return templates.TemplateResponse(
+            "regression/regression_upload.html",
+            {
+                "request": request,
+                "page": "upload",
+                "message": "❌ Maximum (5) datasets reached. Delete one to upload another.",
+                "columns": get_column_names(),
+                "preview_table": get_head_as_html(10) if get_column_names() else None,
+                "datasets": datasets,
+                "show_delete": True
+            }
+        )
+
+    # detect file type
+    name_low = file.filename.lower()
+    if   name_low.endswith(".csv"):
+        ftype = "csv"
+    elif name_low.endswith((".xls", ".xlsx")):
+        ftype = "excel"
     else:
-        return templates.TemplateResponse("regression/regression_upload.html", {
+        return templates.TemplateResponse(
+            "regression/regression_upload.html",
+            {
+                "request": request,
+                "page": "upload",
+                "message": "❌ Unsupported file format",
+                "datasets": datasets,
+                "show_delete": False
+            }
+        )
+
+    df, msg = save_uploaded_file(file.file, ftype, original_name=file.filename)
+
+    return templates.TemplateResponse(
+        "regression/regression_upload.html",
+        {
             "request": request,
             "page": "upload",
-            "message": message
-        })
+            "message": msg,
+            "columns": df.columns.tolist() if df is not None else None,
+            "preview_table": get_head_as_html(10) if df is not None else None,
+            "datasets": list_saved_datasets(),
+            "show_delete": False
+        }
+    )
+
+#Delete daraset
+@app.post("/regression/delete", response_class=HTMLResponse)
+async def delete_datasets(request: Request, delete_files: list[str] = Form(...)):
+    deleted = []
+    not_found = []
+
+    for filename in delete_files:
+        if delete_saved_dataset(filename):
+            deleted.append(filename)
+        else:
+            not_found.append(filename)
+
+    msg_parts = []
+    if deleted:
+        msg_parts.append(f"🗑️ Deleted: {', '.join(deleted)}")
+    if not_found:
+        msg_parts.append(f"⚠️ Not found: {', '.join(not_found)}")
+    msg = " | ".join(msg_parts)
+
+    cols = get_column_names()
+    preview = get_head_as_html(10) if cols else None
+
+    return templates.TemplateResponse(
+        "regression/regression_upload.html",
+        {
+            "request": request,
+            "page": "upload",
+            "message": msg,
+            "columns": cols,
+            "preview_table": preview,
+            "datasets": list_saved_datasets(),
+            "show_delete": False
+        }
+    )
+
+    
 
 # Handle Table Preview (Only Showing Table)
 @app.post("/regression/preview", response_class=HTMLResponse)

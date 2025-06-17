@@ -5,38 +5,79 @@
 {% block content %}
 <div class="row">
   <!-- 📚 Sidebar Navigation -->
-  <div class="col-md-3 mb-4">
-    <div class="list-group custom-sticky-sidebar shadow-sm rounded-3">
-      <a href="/regression/upload"
-         class="list-group-item list-group-item-action {% if page == 'upload' %}active{% endif %}">
-        <i class="fas fa-upload me-2"></i>1️⃣ Upload Data
-      </a>
+
+<div class="col-md-3 mb-4">
+  <div class="list-group custom-sticky-sidebar shadow-sm rounded-3">
+
+    <!-- 1️⃣ Upload Data -->
+    <a href="/regression/upload"
+       class="list-group-item list-group-item-action {% if page == 'upload' %}active{% endif %}">
+      <i class="fas fa-upload me-2"></i>1️⃣ Upload Data
+    </a>
+
+    <!-- 2️⃣ Preprocessing Toggle Button -->
+    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if page in ['clean', 'visualize', 'outliers', 'scale', 'select_features', 'pca'] %}active{% endif %}"
+            data-bs-toggle="collapse"
+            data-bs-target="#preprocessCollapse"
+            aria-expanded="{% if page in ['clean', 'visualize', 'outliers', 'scale', 'select_features', 'pca'] %}true{% else %}false{% endif %}">
+      <span><i class="fas fa-cogs me-2"></i>2️⃣ Preprocessing</span>
+      <i class="fas fa-chevron-down small"></i>
+    </button>
+
+    <!-- 📦 Preprocessing Sub-Items -->
+    <div class="collapse {% if page in ['clean', 'visualize', 'outliers', 'scale', 'select_features', 'pca'] %}show{% endif %}" id="preprocessCollapse">
       <a href="/regression/clean"
-         class="list-group-item list-group-item-action {% if page == 'clean' %}active{% endif %}">
-        <i class="fas fa-broom me-2"></i> 2️⃣Clean Data
+         class="list-group-item list-group-item-action ps-5 {% if page == 'clean' %}active{% endif %}">
+        🧹 Clean & Encode
       </a>
       <a href="/regression/visualize"
-         class="list-group-item list-group-item-action {% if page == 'visualize' %}active{% endif %}">
-        <i class="fas fa-chart-bar me-2"></i>3️⃣ Data Visualize
+         class="list-group-item list-group-item-action ps-5 {% if page == 'visualize' %}active{% endif %}">
+        📊 Visualize Data
       </a>
-      <a href="/regression/model"
-         class="list-group-item list-group-item-action {% if page == 'model' %}active{% endif %}">
-        <i class="fas fa-cogs me-2"></i>4️⃣ Select Model
+      <a href="/regression/outliers"
+         class="list-group-item list-group-item-action ps-5 {% if page == 'outliers' %}active{% endif %}">
+        🚨 Outlier Handling
       </a>
-      <a href="/regression/train"
-         class="list-group-item list-group-item-action {% if page == 'train' %}active{% endif %}">
-        <i class="fas fa-play-circle me-2"></i>5️⃣ Train & Evaluate
+      <a href="/regression/scale"
+         class="list-group-item list-group-item-action ps-5 {% if page == 'scale' %}active{% endif %}">
+        📏 Scaling
       </a>
-      <a href="/regression/predict"
-         class="list-group-item list-group-item-action {% if page == 'predict' %}active{% endif %}">
-        <i class="fas fa-magic me-2"></i>6️⃣ Predict New Data
+      <a href="/regression/select_features"
+         class="list-group-item list-group-item-action ps-5 {% if page == 'select_features' %}active{% endif %}">
+        🧠 Feature Selection
       </a>
-      <a href="/regression/results"
-         class="list-group-item list-group-item-action {% if page == 'results' %}active{% endif %}">
-        <i class="fas fa-chart-line me-2"></i>7️⃣ Visualize Results
+      <a href="/regression/pca"
+         class="list-group-item list-group-item-action ps-5 {% if page == 'pca' %}active{% endif %}">
+        🧮 PCA (Optional)
       </a>
     </div>
+
+    <!-- 3️⃣ Train-Test Split -->
+    <a href="/regression/split"
+       class="list-group-item list-group-item-action {% if page == 'split' %}active{% endif %}">
+      <i class="fas fa-random me-2"></i>3️⃣ Train-Test Split
+    </a>
+
+    <!-- 4️⃣ Model Selection -->
+    <a href="/regression/model"
+       class="list-group-item list-group-item-action {% if page == 'model' %}active{% endif %}">
+      <i class="fas fa-cogs me-2"></i>4️⃣ Model Selection
+    </a>
+
+    <!-- 5️⃣ Train & Evaluate -->
+    <a href="/regression/train"
+       class="list-group-item list-group-item-action {% if page == 'train' %}active{% endif %}">
+      <i class="fas fa-play-circle me-2"></i>5️⃣ Train & Evaluate
+    </a>
+
+    <!-- 6️⃣ Predict -->
+    <a href="/regression/predict"
+       class="list-group-item list-group-item-action {% if page == 'predict' %}active{% endif %}">
+      <i class="fas fa-magic me-2"></i>6️⃣ Predict New Data
+    </a>
+
   </div>
+</div>
 
   <!-- 🎯 Main Content Panel -->
   <div class="col-md-9">
@@ -60,8 +101,9 @@
 
         <div class="progress mb-4" role="progressbar" style="height: 18px;">
           <div class="progress-bar bg-info" style="width: {{ progress_percent }}%;">
-            Step {{ current_step }} of {{ total_steps }}
+          Step {{ current_step }} of {{ total_steps }}
           </div>
+          
         </div>
 
         <!-- 🔧 Dynamic Workflow Content -->
