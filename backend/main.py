@@ -1,27 +1,28 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request, Request, Form
+from fastapi import FastAPI, File, UploadFile, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import os
 
-#Ram Work
-
 # Import logic from utils
-from utils.upload import (
+from utils.regression.upload import (
     save_uploaded_file,
     get_column_names,
     get_head_as_html,
     preview_uploaded_data
 )
-from utils.cleaning import (
+from utils.regression.cleaning import (
     get_missing_columns,
     get_categorical_columns,
     apply_missing_value_strategy,
     apply_encoding,
     get_cleaned_data_preview
 )
-
-from utils.visualize import get_numeric_columns, generate_visualizations
+from utils.regression.outliers import (
+    get_numeric_columns_for_outliers,
+    handle_outliers
+)
+from utils.regression.visualize import get_numeric_columns, generate_visualizations
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -88,8 +89,6 @@ async def handle_upload(
         "message": message,
         "columns": df.columns.tolist() if df is not None else None
     })
-    
-
 # Handle Table Preview (Only Showing Table)
 @app.post("/regression/preview", response_class=HTMLResponse)
 async def preview_data(
@@ -173,6 +172,31 @@ async def handle_visualization_request(
         "page": "visualize",
         "numeric_columns": numeric_cols,
         "plots": plots
+    })
 
-        ##Rahul_work
+# 📍 Route: Outlier Handling Page (GET)
+@app.get("/regression/outliers", response_class=HTMLResponse)
+async def outlier_page(request: Request):
+    return templates.TemplateResponse("regression/regression_outliers.html", {
+        "request": request,
+        "page": "outliers",
+        "numeric_columns": get_numeric_columns_for_outliers()
+    })
+
+# 📍 Route: Outlier Handling Form (POST)
+@app.post("/regression/outliers", response_class=HTMLResponse)
+async def process_outliers(
+    request: Request,
+    column_name: str = Form(...),
+    method: str = Form(...)
+):
+    summary_before, summary_after, message = handle_outliers(column_name, method)
+
+    return templates.TemplateResponse("regression/regression_outliers.html", {
+        "request": request,
+        "page": "outliers",
+        "numeric_columns": get_numeric_columns_for_outliers(),
+        "message": message,
+        "summary_before": summary_before,
+        "summary_after": summary_after
     })
