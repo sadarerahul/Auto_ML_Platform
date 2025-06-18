@@ -12,14 +12,6 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # 🔄 Load data (auto-load cleaned if exists)
 def load_data():
-<<<<<<< HEAD
-    if os.path.exists(CLEANED_DATA_PATH):
-        return pd.read_csv(CLEANED_DATA_PATH)
-    elif os.path.exists(DATA_PATH):
-        return pd.read_csv(DATA_PATH)
-    else:
-        return pd.DataFrame()
-=======
     """Return the freshest available DataFrame.
     • If cleaned_data.csv exists **and** is newer than uploaded_data.csv → use it
     • Otherwise fall back to uploaded_data.csv
@@ -30,7 +22,6 @@ def load_data():
     if os.path.exists(DATA_PATH):
         return pd.read_csv(DATA_PATH)
     return pd.DataFrame()
->>>>>>> Rahul_work
 
 # 📦 Save cleaned data
 def save_data(df):
