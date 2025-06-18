@@ -3,6 +3,7 @@
 import os
 import pandas as pd
 import plotly.express as px
+<<<<<<< HEAD
 from plotly.io import to_html
 
 # Path to cleaned data
@@ -13,13 +14,28 @@ def get_numeric_columns() -> list:
     """Return list of numeric column names from cleaned_data.csv."""
     try:
         df = pd.read_csv(DATA_PATH)
+=======
+# Use cleaning.load_data() so we always get the most‑recent dataset
+from .cleaning import load_data as _load_data
+from plotly.io import to_html
+
+def get_numeric_columns() -> list:
+    """Return numeric columns from the freshest dataset."""
+    try:
+        df = _load_data()
+>>>>>>> Rahul_work
         return df.select_dtypes(include="number").columns.tolist()
     except Exception:
         return []
 
 def load_cleaned_data() -> pd.DataFrame:
+<<<<<<< HEAD
     """Load the cleaned dataset."""
     return pd.read_csv(DATA_PATH)
+=======
+    """Return the freshest dataset (cleaned if available)."""
+    return _load_data()
+>>>>>>> Rahul_work
 
 # Single-column visualizations (index vs column)
 def make_scatter(df, column: str, limit: int) -> str:

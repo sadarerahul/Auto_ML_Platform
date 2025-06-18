@@ -1,6 +1,6 @@
-from fastapi import FastAPI, File, UploadFile, Form, Request
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+<<<<<<< HEAD
 from fastapi.templating import Jinja2Templates
 import os
 
@@ -23,17 +23,24 @@ from utils.regression.outliers import (
     handle_outliers
 )
 from utils.regression.visualize import get_numeric_columns, generate_visualizations
+=======
 
-# Initialize FastAPI app
+from backend.routes import (
+    root_routes,
+    upload_routes,
+    clean_routes,
+    visualize_routes,
+    outlier_routes
+)
+
+>>>>>>> Rahul_work
+
 app = FastAPI()
 
-# Define paths
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "../frontend/templates")
-STATIC_DIR = os.path.join(BASE_DIR, "../frontend/static")
-UPLOAD_DIR = os.path.join(STATIC_DIR, "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Mount static files
+app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
+<<<<<<< HEAD
 # Jinja and Static Mount
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -200,3 +207,11 @@ async def process_outliers(
         "summary_before": summary_before,
         "summary_after": summary_after
     })
+=======
+# Register routers
+app.include_router(root_routes.router)
+app.include_router(upload_routes.router)
+app.include_router(clean_routes.router)
+app.include_router(visualize_routes.router)
+app.include_router(outlier_routes.router)
+>>>>>>> Rahul_work

@@ -28,6 +28,14 @@ def save_uploaded_file(file, file_type="csv"):
             raise ValueError("Unsupported file format")
 
         df.to_csv(DATA_PATH, index=False)  # Save as CSV
+<<<<<<< HEAD
+=======
+        # 🔄  If there is a leftover cleaned_data.csv from a previous dataset,
+        #     delete it so future steps load the fresh file.
+        CLEANED_DATA_PATH = os.path.join(UPLOAD_DIR, "cleaned_data.csv")
+        if os.path.exists(CLEANED_DATA_PATH):
+            os.remove(CLEANED_DATA_PATH)
+>>>>>>> Rahul_work
         return df, "✅ File uploaded successfully!"
     except Exception as e:
         return None, f"❌ Error: {str(e)}"
@@ -71,6 +79,10 @@ async def preview_uploaded_data(
 
         return templates.TemplateResponse("regression/regression_upload.html", {
             "request": request,
+<<<<<<< HEAD
+=======
+            "page": "upload",
+>>>>>>> Rahul_work
             "columns": columns,
             "preview_table": preview_table,
             "message": message
