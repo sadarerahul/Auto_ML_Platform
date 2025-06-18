@@ -1,0 +1,59 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<div class="card bg-dark border-secondary shadow-sm">
+  <div class="card-body">
+    <h4 class="card-title text-info mb-3">🚨 Outlier Detection & Handling</h4>
+    <p class="text-muted">Choose columns and detection method to clean outliers from your dataset.</p>
+
+    <!-- Outlier Handling Form -->
+    <form action="/regression/outliers" method="post" class="row g-4">
+      <div class="col-md-6">
+        <label class="form-label">📈 Select Numeric Column</label>
+        <select name="column_name" class="form-select" required>
+          {% for col in numeric_columns %}
+            <option value="{{ col }}">{{ col }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">🧮 Choose Method</label>
+        <select name="method" class="form-select" required>
+          <option value="iqr">IQR Method</option>
+          <option value="zscore">Z-Score</option>
+          <option value="capping">Capping</option>
+        </select>
+      </div>
+
+      <div class="col-md-12 text-end">
+        <button class="btn btn-outline-warning" type="submit">🧹 Clean Outliers</button>
+      </div>
+    </form>
+
+    <!-- Results -->
+    {% if message %}
+      <div class="alert alert-info mt-4">{{ message }}</div>
+    {% endif %}
+
+    {% if summary_before and summary_after %}
+    <hr class="border-secondary">
+    <h5 class="text-light">📊 Summary Before & After</h5>
+    <div class="row g-4">
+      <div class="col-md-6">
+        <h6 class="text-muted">Before Cleaning</h6>
+        <div class="table-responsive text-white">
+          {{ summary_before | safe }}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <h6 class="text-muted">After Cleaning</h6>
+        <div class="table-responsive text-white">
+          {{ summary_after | safe }}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
