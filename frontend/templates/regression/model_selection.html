@@ -1,0 +1,35 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<h4 class="text-info mb-3">🤖 Model Selection & Evaluation</h4>
+
+<form method="post" class="mb-4">
+  <p class="text-light">Select one or more models:</p>
+  <div class="row">
+    {% for key, pair in models.items() %}
+      <div class="col-md-6">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox"
+                 name="selected_models" id="m{{ loop.index }}" value="{{ key }}"
+                 {% if selected and key in selected %}checked{% endif %}>
+          <label class="form-check-label text-light" for="m{{ loop.index }}">
+            {{ pair[0] }}
+          </label>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <button class="btn btn-outline-success mt-3" type="submit">🚀 Train & Evaluate</button>
+</form>
+
+{% if message %}
+  <div class="alert alert-info">{{ message }}</div>
+{% endif %}
+
+{% if results_table %}
+  <h5 class="text-light">📊 Results</h5>
+  <div class="table-responsive">
+    {{ results_table | safe }}
+  </div>
+{% endif %}
+{% endblock %}

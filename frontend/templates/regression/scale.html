@@ -1,0 +1,36 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<h4 class="text-info mb-3">⚙️ Scaling</h4>
+
+<form method="post" class="row g-3 mb-4">
+  <div class="col-md-6">
+    <label class="form-label">Select Scaler</label>
+    <select name="scaler_type" class="form-select" required>
+      <option value="standard">StandardScaler (z‑score)</option>
+      <option value="minmax">MinMaxScaler (0‑1)</option>
+    </select>
+  </div>
+  <div class="col-md-6 d-grid align-items-end">
+    <button type="submit" class="btn btn-outline-success">🚀 Apply Scaling</button>
+  </div>
+</form>
+
+{% if message %}
+  <div class="alert alert-info">{{ message }}</div>
+{% endif %}
+
+{% if preview %}
+  <h6 class="text-light">🔎 Preview (Top 5 rows)</h6>
+  <div class="row">
+    {% for key, df in preview.items() %}
+      <div class="col-md-6 mb-3">
+        <h6 class="text-warning">{{ key }}</h6>
+        <div class="table-responsive">
+          {{ df.to_html(classes="table table-sm table-dark", index=False) | safe }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}

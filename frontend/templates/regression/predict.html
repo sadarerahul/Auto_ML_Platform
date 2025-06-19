@@ -1,0 +1,53 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<h4 class="text-info mb-3">🔮 Prediction</h4>
+
+<form method="post" enctype="multipart/form-data" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <label class="form-label">🤖 Choose Model</label>
+    <select name="model_key" class="form-select" required>
+      {% for key, fname in models.items() %}
+        <option value="{{ key }}" {% if key == selected_model %}selected{% endif %}>
+          {{ fname }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-4">
+    <label class="form-label">📊 Data Source</label>
+    <select name="data_source" class="form-select" id="ds_select"
+            onchange="toggleUpload(this.value)" required>
+      <option value="x_test" {% if data_name == 'X_test_scaled' %}selected{% endif %}>Use X_test_scaled</option>
+      <option value="upload" {% if data_name and data_name != 'X_test_scaled' %}selected{% endif %}>Upload CSV</option>
+    </select>
+  </div>
+
+  <div class="col-md-4" id="upload_div" style="display:{% if data_name and data_name != 'X_test_scaled' %}block{% else %}none{% endif %};">
+    <label class="form-label">Upload CSV</label>
+    <input type="file" name="upload_file" class="form-control" accept=".csv">
+  </div>
+
+  <div class="col-12 d-grid">
+    <button class="btn btn-outline-success mt-2" type="submit">🚀 Predict</button>
+  </div>
+</form>
+
+<script>
+function toggleUpload(val){
+  document.getElementById("upload_div").style.display = (val === "upload") ? "block" : "none";
+}
+</script>
+
+{% if message %}
+  <div class="alert alert-info">{{ message }}</div>
+{% endif %}
+
+{% if results_table %}
+  <h6 class="text-light">🔎 Predictions Preview (Top 10)</h6>
+  <div class="table-responsive">
+    {{ results_table | safe }}
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<h4 class="text-info mb-3">🔀 Train‑Test Split</h4>
+
+{% if not xy_state.y %}
+  <div class="alert alert-warning">
+    Please define X and y first in the <strong>Feature Selection</strong> step.
+  </div>
+{% else %}
+  <form method="post" class="row g-3 mb-4">
+    <div class="col-md-4">
+      <label class="form-label">Test Size</label>
+      <select class="form-select" name="test_size_predefined" onchange="document.getElementById('manual_test_size').value = '';">
+        <option value="">— Select from options —</option>
+        <option value="0.1">0.1 (10%)</option>
+        <option value="0.2" selected>0.2 (20%)</option>
+        <option value="0.25">0.25 (25%)</option>
+        <option value="0.3">0.3 (30%)</option>
+        <option value="0.4">0.4 (40%)</option>
+      </select>
+      <small class="text-muted">OR enter manually below</small>
+      <input type="number" id="manual_test_size" step="0.01" min="0.05" max="0.95"
+             name="test_size_manual" class="form-control mt-1" placeholder="e.g., 0.33">
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Random State</label>
+      <input type="number" name="random_state" class="form-control"
+             value="42" required>
+    </div>
+
+    <div class="col-md-4 d-grid align-items-end">
+      <button type="submit" class="btn btn-outline-success">🚀 Split</button>
+    </div>
+  </form>
+{% endif %}
+
+{% if message %}
+  <div class="alert alert-info">{{ message }}</div>
+{% endif %}
+
+{% if preview %}
+  <h6 class="text-light">🔎 Preview (Top 5 Rows)</h6>
+  <div class="row">
+    {% for key, df in preview.items() %}
+      <div class="col-md-6 mb-3">
+        <h6 class="text-warning">{{ key }}</h6>
+        <div class="table-responsive">
+          {{ df.to_html(classes="table table-sm table-dark", index=False) | safe }}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+{% endblock %}
