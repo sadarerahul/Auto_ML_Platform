@@ -1,0 +1,86 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<h4 class="text-info mb-3">🔍 Feature Selection</h4>
+
+<!-- ── Correlation / Top‑K form ── -->
+<form method="post" class="row g-3 mb-4">
+  <div class="col-md-6">
+    <label class="form-label">🎯 Target (y)</label>
+    <select name="target_col" class="form-select" required>
+      {% for col in numeric_columns %}
+        <option value="{{ col }}" {% if col == target_col %}selected{% endif %}>{{ col }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-md-3">
+    <label class="form-label">Top‑K Features</label>
+    <input type="number" name="top_k" class="form-control" min="1"
+           value="{{ top_k or 10 }}" required>
+  </div>
+
+  <div class="col-md-3 d-grid align-items-end">
+    <button type="submit" class="btn btn-outline-success">📈 Correlate</button>
+  </div>
+</form>
+
+{% if message %}<div class="alert alert-info">{{ message }}</div>{% endif %}
+
+{% if plot_html %}
+  <h5 class="text-light">📊 Correlation Plot</h5>
+  <div class="border rounded p-2 bg-white">
+    {{ plot_html | safe }}
+  </div>
+{% endif %}
+
+{% if selected_features %}
+  <h6 class="text-light mt-3">🏆 Selected (Top {{ top_k }})</h6>
+  <ul class="list-group list-group-flush">
+    {% for f in selected_features %}
+      <li class="list-group-item bg-dark text-light">{{ f }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<!-- ── NEW: X / y definition ── -->
+<hr class="border-secondary mt-4">
+<h4 class="text-info mb-3">🗂️ Define X / y for Modeling</h4>
+
+<form action="/regression/select_features/xy" method="post">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">🎯 Target (y)</label>
+      {% for col in numeric_columns %}
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="y_col"
+                 id="y{{ loop.index }}" value="{{ col }}"
+                 {% if xy_state.y == col %}checked{% endif %}>
+          <label class="form-check-label" for="y{{ loop.index }}">{{ col }}</label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">📊 Predictor Columns (X)</label>
+      {% for col in numeric_columns %}
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="x_cols"
+                 id="x{{ loop.index }}" value="{{ col }}"
+                 {% if col in xy_state.X %}checked{% endif %}>
+          <label class="form-check-label" for="x{{ loop.index }}">{{ col }}</label>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-outline-primary mt-3">💾 Save X / y</button>
+</form>
+
+{% if xy_state.y %}
+  <div class="alert alert-success mt-3">
+    Current selection: <strong>y = {{ xy_state.y }}</strong>,
+    X = {{ xy_state.X | join(", ") }}
+  </div>
+{% endif %}
+{% endblock %}
