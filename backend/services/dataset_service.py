@@ -2,7 +2,11 @@
 import os, uuid
 from backend.config import MAX_DATASETS, UPLOAD_DIR
 from backend.utils import file_utils
-from ..utils.regression.upload import save_uploaded_file                 # existing helper
+from ..utils.regression.upload import save_uploaded_file
+from backend.utils.regression.session_state import set_active_dataset
+
+CLEANED_DATA_DIR = os.path.abspath("frontend/static/cleaned")
+
 
 def _get_available_name(original: str) -> str:
     """Ensure no name conflict. Return available file name with .csv extension."""
@@ -35,12 +39,28 @@ def upload_dataset(upload_file):
 
     final_name = _get_available_name(upload_file.filename)
     file_utils.save_raw_copy(upload_file, final_name)
-    upload_file.file.seek(0)  # reset pointer after saving raw
+    upload_file.file.seek(0)
 
     df, msg = save_uploaded_file(upload_file.file, ftype)
     blocked = df is None
+
+    # ✅ Prevent re-cleaning cleaned datasets
+    if final_name.endswith("_cleaned.csv"):
+        set_active_dataset(final_name)
+        return df, f"✅ Uploaded as {final_name} (already cleaned — no further cleaning applied)", blocked
+
+    if df is not None:
+        set_active_dataset(final_name)
+
     return df, f"✅ Uploaded as {final_name}" if df is not None else msg, blocked
 
-
 def delete_files(filenames: list[str]):
-    file_utils.delete_files(filenames)
+    for filename in filenames:
+        raw_path = os.path.join(UPLOAD_DIR, filename)
+        cleaned_path = os.path.join(CLEANED_DATA_DIR, filename.replace(".csv", "_cleaned.csv"))
+
+        if os.path.exists(raw_path):
+            os.remove(raw_path)
+
+        if os.path.exists(cleaned_path):
+            os.remove(cleaned_path)

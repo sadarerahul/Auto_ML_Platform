@@ -1,87 +1,59 @@
-from fastapi import APIRouter, UploadFile, File, Form, Request
+from fastapi import APIRouter, UploadFile, File, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
-from backend.utils.regression.context import get_sidebar_context
 
-from ..utils.regression.upload import (
-    get_column_names,
-    get_head_as_html,
-    preview_uploaded_data
-)
-from ..services import dataset_service
-from backend.config import MAX_DATASETS    
+from backend.utils.regression.context import get_sidebar_context
+from backend.utils.regression.upload import get_column_names, get_head_as_html, save_uploaded_file
+from backend.utils.regression.session_state import get_active_dataset
+from backend.services import dataset_service  # in case you still need delete_files
 
 router = APIRouter()
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "../../frontend/templates")
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 
-# ---------- GET: upload page ----------
-# ---------- GET: upload page ----------
+# ---------- GET: Upload Page ----------
 @router.get("/regression/upload", response_class=HTMLResponse)
 async def upload_page(request: Request):
-    cols = get_column_names()
+    filename = get_active_dataset()
+    cols = get_column_names() if filename else []
     preview = get_head_as_html(10) if cols else None
 
-    upload_dir = "frontend/static/uploads"
-    files = sorted(
-        os.listdir(upload_dir),
-        key=lambda f: os.path.getmtime(os.path.join(upload_dir, f)),
-        reverse=True
-    )
-    active = files[0] if files else None
+    context = {
+        "request": request,
+        "page": "upload",
+        "columns": cols,
+        "preview_table": preview,
+        **get_sidebar_context(active_file=filename)
+    }
+    return templates.TemplateResponse("regression/regression_upload.html", context)
 
-    return templates.TemplateResponse(
-        "regression/regression_upload.html",
-        {
-            "request": request,
-            "page": "upload",
-            "columns": cols,
-            "preview_table": preview,
-            "files": files,
-            "max_datasets": MAX_DATASETS,
-            **get_sidebar_context(active_file=active)
-        }
-    )
-
-# ---------- POST: upload file ----------
+# ---------- POST: Upload File ----------
 @router.post("/regression/upload", response_class=HTMLResponse)
 async def upload_file(request: Request, file: UploadFile = File(...)):
-    df, msg, blocked = dataset_service.upload_dataset(file)
-    cols = df.columns.tolist() if df is not None else get_column_names()
+    df, msg = await save_uploaded_file(file)
 
-    upload_dir = "frontend/static/uploads"
-    files = sorted(
-        os.listdir(upload_dir),
-        key=lambda f: os.path.getmtime(os.path.join(upload_dir, f)),
-        reverse=True
-    )
-    active = files[0] if files else None
+    if df is not None:
+        preview = df.head(10).to_html(classes="table table-striped table-bordered", index=False)
+        cols = df.columns.tolist()
+        active_file = file.filename
+    else:
+        preview = None
+        cols = []
+        active_file = ""
 
-    return templates.TemplateResponse(
-        "regression/regression_upload.html",
-        {
-            "request": request,
-            "page": "upload",
-            "message": msg,
-            "columns": cols,
-            "files": files,
-            "max_datasets": MAX_DATASETS,
-            "show_delete": blocked,
-            **get_sidebar_context(active_file=active)
-        }
-    )
+    context = {
+        "request": request,
+        "page": "upload",
+        "message": msg,
+        "columns": cols,
+        "preview_table": preview,
+        **get_sidebar_context(active_file=active_file)
+    }
+    return templates.TemplateResponse("regression/regression_upload.html", context)
 
-
-# ---------- POST: preview table ----------
-@router.post("/regression/preview", response_class=HTMLResponse)
-async def preview_table(request: Request,
-                        action_type: str = Form(...),
-                        num_rows: int = Form(None)):
-    return await preview_uploaded_data(request, action_type, num_rows)
-
-# ---------- POST: delete ----------
+# ---------- POST: Delete Datasets ----------
 @router.post("/regression/delete", response_class=HTMLResponse)
-async def delete_datasets(request: Request, filenames: list[str] = Form(...)):
+async def delete_datasets(request: Request, filenames: list[str] = File(...)):
     dataset_service.delete_files(filenames)
-    return await upload_page(request)  # 🟡 It will recompute active_file from scratch
+    return await upload_page(request)
