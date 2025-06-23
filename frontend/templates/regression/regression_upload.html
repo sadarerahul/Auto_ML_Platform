@@ -4,51 +4,38 @@
 <div class="card bg-dark border-secondary shadow-sm">
   <div class="card-body">
     <h4 class="card-title text-info">📁 Upload Your Dataset</h4>
-    <p class="text-muted">Upload your CSV or Excel file to start the regression workflow.</p>
+    <p class="text-muted mb-4">Upload a CSV or Excel file to begin working with regression tools.</p>
 
-    <!-- Upload Form -->
-    <!-- Upload Form -->
-<form action="/regression/upload" method="post" enctype="multipart/form-data" class="mb-4">
-  <div class="row g-3 align-items-end">
-    <div class="col-md-6">
-      <label for="file" class="form-label">Select File</label>
-      <input type="file" class="form-control" name="file" id="file" accept=".csv, .xlsx" required>
-    </div>
-    <div class="col-md-2 d-grid">
-      <button class="btn btn-outline-info" type="submit">Upload</button>
-    </div>
-  </div>
-</form>
+    <!-- 🔼 Upload Form -->
+    <form action="/regression/upload" method="post" enctype="multipart/form-data" class="mb-4">
+        <div class="row g-3 align-items-center">
+          <!-- File Input -->
+          <div class="col-md-8">
+            <label for="file" class="form-label text-light">Choose a File</label>
+            <input type="file" class="form-control" name="file" id="file" accept=".csv,.xlsx" required>
+            {% if active_file %}
+              <div class="form-text text-warning mt-1">Active Dataset: {{ active_file }}</div>
+            {% endif %}
+          </div>
 
+          <!-- Upload Button -->
+          <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-outline-info w-100">📤 Upload Dataset</button>
+          </div>
+        </div>
+      </form>
 
-    <!-- Upload Status Message -->
+    <!-- 🔔 Feedback Message -->
     {% if message %}
-      <div class="alert alert-info">{{ message }}</div>
+      <div class="alert alert-info mt-4">
+        {{ message }}
+      </div>
     {% endif %}
 
-    <!-- Table Preview Form -->
-    {% if columns %}
-    <hr class="border-secondary">
-    <h5 class="text-light mb-3">🔍 Preview Table</h5>
-
-    <form method="post" action="/regression/preview" class="row g-3 mb-4">
-      <input type="hidden" name="action_type" value="show_table">
-      <div class="col-md-4">
-        <label class="form-label">Number of Rows to Display</label>
-        <input type="number" name="num_rows" class="form-control" min="1" value="10" required>
-      </div>
-      <div class="col-md-2 d-grid align-items-end">
-        <button type="submit" class="btn btn-outline-success">📄 Show Table</button>
-      </div>
-    </form>
-    {% endif %}
-
-  
-
-
-    <!-- Preview Table Output -->
+    <!-- 📄 Table Preview -->
     {% if preview_table %}
-      <h5 class="text-light mt-4">📄 Table Preview</h5>
+      <hr class="border-secondary mt-5">
+      <h5 class="text-light mb-3">🧾 Data Preview (First Few Rows)</h5>
       <div class="table-responsive">
         {{ preview_table | safe }}
       </div>

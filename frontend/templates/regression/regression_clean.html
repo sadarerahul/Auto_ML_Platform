@@ -3,18 +3,20 @@
 {% block regression_content %}
 <div class="card bg-dark border-secondary shadow-sm">
   <div class="card-body">
-    <h4 class="card-title text-info">🧹 Data Cleaning</h4>
-    <p class="text-muted">Handle missing values and encode categorical variables before training your model.</p>
+    <h4 class="card-title text-info mb-2">🧹 Data Cleaning</h4>
+    <p class="text-muted mb-4">Manage missing values and encode categorical variables before modeling.</p>
 
     {% if message %}
-      <div class="alert alert-info">{{ message }}</div>
+      <div class="alert alert-{{ message_type or 'info' }}">{{ message }}</div>
     {% endif %}
 
+    {% if missing_columns or categorical_columns %}
     <div class="row">
-      <!-- 📌 Missing Value Handling -->
-      <div class="col-md-6">
-        <div class="border rounded p-3 mb-4">
-          <h5 class="text-warning">🔧 Handle Missing Values</h5>
+      <!-- 🔧 Missing Values -->
+      {% if missing_columns %}
+      <div class="col-md-6 mb-4">
+        <div class="border border-warning-subtle bg-dark rounded p-3 h-100 shadow-sm">
+          <h5 class="text-warning mb-3">🔧 Handle Missing Values</h5>
           <form method="post" action="/regression/clean">
             <input type="hidden" name="cleaning_type" value="missing">
             <div class="mb-3">
@@ -36,20 +38,22 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Custom Value (optional)</label>
+              <label class="form-label">Custom Value <small class="text-muted">(optional)</small></label>
               <input type="text" class="form-control" name="custom_value" placeholder="Only used if strategy = custom">
             </div>
             <div class="d-grid">
-              <button type="submit" class="btn btn-outline-warning">Apply Cleaning</button>
+              <button type="submit" class="btn btn-outline-warning">🧹 Clean Missing</button>
             </div>
           </form>
         </div>
       </div>
+      {% endif %}
 
-      <!-- 🧠 Encoding -->
-      <div class="col-md-6">
-        <div class="border rounded p-3 mb-4">
-          <h5 class="text-success">🔠 Encode Categorical Columns</h5>
+      <!-- 🔠 Encoding -->
+      {% if categorical_columns %}
+      <div class="col-md-6 mb-4">
+        <div class="border border-success-subtle bg-dark rounded p-3 h-100 shadow-sm">
+          <h5 class="text-success mb-3">🔠 Encode Categorical Columns</h5>
           <form method="post" action="/regression/clean">
             <input type="hidden" name="cleaning_type" value="encoding">
             <div class="mb-3">
@@ -69,22 +73,23 @@
               </select>
             </div>
             <div class="d-grid">
-              <button type="submit" class="btn btn-outline-success">Apply Encoding</button>
+              <button type="submit" class="btn btn-outline-success">⚙️ Apply Encoding</button>
             </div>
           </form>
         </div>
       </div>
+      {% endif %}
     </div>
+    {% endif %}
 
-    <!-- 🧾 Data Preview -->
+    <!-- 📋 Cleaned Data Preview -->
     {% if preview_table %}
       <hr class="border-secondary my-4">
-      <h5 class="text-light">📋 Preview Cleaned Data</h5>
-      <div class="table-responsive">
+      <h5 class="text-light mb-2">📋 Preview Cleaned Data</h5>
+      <div class="table-responsive border border-secondary rounded bg-dark p-2">
         {{ preview_table | safe }}
       </div>
     {% endif %}
-
   </div>
 </div>
 {% endblock %}

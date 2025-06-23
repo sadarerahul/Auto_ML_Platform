@@ -7,7 +7,38 @@
   <!-- ▓▓▓ SIDEBAR ▓▓▓ -->
   <div class="col-md-3 mb-4">
     <div class="list-group custom-sticky-sidebar shadow-sm rounded-3">
+      {% if page =="upload" %}
+      <form action="/regression/switch_dataset" method="post" class="mb-3">
+        <div class="d-flex align-items-center bg-dark border border-info rounded px-3 py-2 shadow-sm">
+          <i class="fas fa-database text-warning me-2"></i>
+          <label for="selected_dataset" class="form-label text-info fw-semibold me-2 mb-0">
+            Active Dataset:
+          </label>
+          <select name="selected_dataset"
+                  id="selected_dataset"
+                  class="form-select form-select-sm w-auto bg-dark text-light border-info"
+                  onchange="this.form.submit()">
+            <option disabled {% if not active_file %}selected{% endif %}>-- Select Dataset --</option>
+            {% for file in files %}
+              <option value="{{ file }}" {% if file == active_file %}selected{% endif %}>
+                {{ file }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+      {% else %}
+       <div class="card bg-dark text-light border border-info mb-4 shadow-sm">
+          <div class="card-body d-flex align-items-center py-2 px-3">
+            <i class="fas fa-database me-3 text-warning fs-5"></i>
+            <div>
+              <div class="small text-muted">Active Dataset</div>
+              <div class="fw-semibold text-info">{{ active_file }}</div>
+            </div>
+          </div>
+        </div>
 
+      {% endif %}
       <!-- 1️⃣ Upload Data -->
       <a href="/regression/upload"
          class="list-group-item list-group-item-action {% if page == 'upload' %}active{% endif %}">
@@ -33,6 +64,10 @@
            class="list-group-item list-group-item-action ps-5 {% if page == 'visualize' %}active{% endif %}">
           📊 Visualize Data
         </a>
+        <a href="/regression/smooth"
+           class="list-group-item list-group-item-action ps-5 {% if page == 'smooth' %}active{% endif %}">
+          🧮 Smoothing (Optional)
+        </a>
         <a href="/regression/outliers"
            class="list-group-item list-group-item-action ps-5 {% if page == 'outliers' %}active{% endif %}">
           🚨 Outlier Handling
@@ -50,10 +85,6 @@
           📏 Scaling
         </a>
         
-        <a href="/regression/pca"
-           class="list-group-item list-group-item-action ps-5 {% if page == 'pca' %}active{% endif %}">
-          🧮 PCA (Optional)
-        </a>
       </div>
 
       <!-- 3️⃣‑6️⃣ Other steps -->
@@ -62,8 +93,8 @@
          class="list-group-item list-group-item-action {% if page == 'model' %}active{% endif %}">
         <i class="fas fa-cogs me-2"></i>3️⃣ Model Selection
       </a>
-      <a href="/regression/train"
-         class="list-group-item list-group-item-action {% if page == 'train' %}active{% endif %}">
+      <a href="/regression/tune"
+         class="list-group-item list-group-item-action {% if page == 'tune' %}active{% endif %}">
         <i class="fas fa-play-circle me-2"></i>4️⃣ Hyperparameter_tuninig
       </a>
       <a href="/regression/predict"
@@ -71,38 +102,45 @@
         <i class="fas fa-magic me-2"></i>5️⃣ Predict New Data
       </a>
     </div>
+   
 
     {# ▓▓▓ DATASET LIST ▓▓▓ #}
+    {% if page == "upload" %}
     {% if files %}
       <hr class="border-secondary">
-      <h5 class="text-light">
-        📂 Stored Datasets ({{ files|length }}/{{ max_datasets }})
-      </h5>
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h5 class="text-light mb-0">
+    📂 Stored Datasets <span class="text-muted fs-6">({{ files|length }}/{{ max_datasets }})</span>
+  </h5>
+</div>
 
-      {% if show_delete %}
-        <div class="alert alert-warning">
-          Maximum of {{ max_datasets }} datasets reached. Delete at least one to upload another.
+{% if show_delete %}
+  <div class="alert alert-warning">
+    ⚠️ You've reached the maximum limit ({{ max_datasets }}) datasets. Please delete at least one to upload more.
+  </div>
+{% endif %}
+
+<form action="/regression/delete" method="post">
+  <div class="list-group list-group-flush mb-3">
+    {% for f in files %}
+      <label class="list-group-item bg-dark text-light d-flex align-items-center justify-content-between px-3 py-2 border border-secondary rounded mb-2">
+        <div class="form-check">
+          <input class="form-check-input me-2" type="checkbox" name="filenames" value="{{ f }}" id="f{{ loop.index }}">
+          <span class="{% if f == active_file %}fw-bold text-warning{% endif %}">
+            <i class="fas fa-file-alt me-1 text-info"></i> {{ f }}
+          </span>
         </div>
-      {% endif %}
-
-      <form action="/regression/delete" method="post" class="mb-3">
-        {% for f in files %}
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox"
-                   name="filenames" value="{{ f }}" id="f{{ loop.index }}">
-            <label class="form-check-label text-light
-                   {% if f == active_file %}fw-bold text-warning{% endif %}"
-                   for="f{{ loop.index }}">
-              {{ f }}
-            </label>
-          </div>
-        {% endfor %}
-        <button class="btn btn-outline-danger mt-2" type="submit">
-          🗑️ Delete Selected
-        </button>
-      </form>
+      </label>
+    {% endfor %}
+  </div>
+  <button class="btn btn-outline-danger w-100" type="submit">
+    🗑️ Delete Selected Datasets
+  </button>
+</form>
     {% endif %}
-  </div> <!-- /sidebar -->
+    {% endif %}
+  </div> 
+  <!-- /sidebar -->
 
   <!-- ▓▓▓ MAIN PANEL ▓▓▓ -->
   <div class="col-md-9">
@@ -116,18 +154,29 @@
         </p>
 
         <!-- Progress bar -->
-        {% set total_steps = 7 %}
-        {% set step_names = {
-          "upload": 1, "clean": 2, "visualize": 3, "model": 4,
-          "train": 5, "predict": 6, "results": 7
-        } %}
-        {% set current_step = step_names.get(page, 1) %}
-        {% set progress_percent = (current_step / total_steps * 100) | round(0, 'ceil') %}
-        <div class="progress mb-4" style="height:18px;">
-          <div class="progress-bar bg-info" style="width:{{ progress_percent }}%;">
-            Step {{ current_step }} / {{ total_steps }}
+        
+          {% set preprocessing_pages = ['clean', 'visualize', 'outliers', 'scale', "split", 'select_features', 'smooth'] %}
+
+          {% set total_steps = 5 %}
+          {% set step_names = {
+            "upload": 1,
+            "model": 3,
+            "tune": 4,
+            "predict":5
+          } %}
+
+          {% if page in preprocessing_pages %}
+            {% set current_step = 2 %}
+          {% else %}
+            {% set current_step = step_names.get(page, 1) %}
+          {% endif %}
+
+          {% set progress_percent = (current_step / total_steps * 100) | round(0, 'ceil') %}
+          <div class="progress mb-4" style="height:18px;">
+            <div class="progress-bar bg-info" style="width:{{ progress_percent }}%;">
+              Step {{ current_step }} / {{ total_steps }}
+            </div>
           </div>
-        </div>
 
         <!-- Dynamic content -->
         <div id="regression-content">

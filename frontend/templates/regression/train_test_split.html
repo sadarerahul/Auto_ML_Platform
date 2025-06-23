@@ -8,10 +8,11 @@
     Please define X and y first in the <strong>Feature Selection</strong> step.
   </div>
 {% else %}
-  <form method="post" class="row g-3 mb-4">
-    <div class="col-md-4">
-      <label class="form-label">Test Size</label>
-      <select class="form-select" name="test_size_predefined" onchange="document.getElementById('manual_test_size').value = '';">
+  <form method="post" class="row g-3 mb-4 align-items-end">
+    <div class="col-md-5">
+      <label class="form-label">📐 Test Size</label>
+      <select class="form-select" name="test_size_predefined"
+              onchange="document.getElementById('manual_test_size').value = '';">
         <option value="">— Select from options —</option>
         <option value="0.1">0.1 (10%)</option>
         <option value="0.2" selected>0.2 (20%)</option>
@@ -19,18 +20,17 @@
         <option value="0.3">0.3 (30%)</option>
         <option value="0.4">0.4 (40%)</option>
       </select>
-      <small class="text-muted">OR enter manually below</small>
+      <small class="text-muted">or enter manually below</small>
       <input type="number" id="manual_test_size" step="0.01" min="0.05" max="0.95"
              name="test_size_manual" class="form-control mt-1" placeholder="e.g., 0.33">
     </div>
 
     <div class="col-md-4">
-      <label class="form-label">Random State</label>
-      <input type="number" name="random_state" class="form-control"
-             value="42" required>
+      <label class="form-label">🎲 Random State</label>
+      <input type="number" name="random_state" class="form-control" value="42" required>
     </div>
 
-    <div class="col-md-4 d-grid align-items-end">
+    <div class="col-md-3 d-grid">
       <button type="submit" class="btn btn-outline-success">🚀 Split</button>
     </div>
   </form>
@@ -41,10 +41,22 @@
 {% endif %}
 
 {% if preview %}
-  <h6 class="text-light">🔎 Preview (Top 5 Rows)</h6>
+  <hr class="border-secondary my-4">
+  <h5 class="text-light">🔎 Preview of Split Data</h5>
+
+  {% if preview.shapes %}
+    <p class="text-muted">
+      Shapes —
+      <code>X_train</code>: {{ preview.shapes.X_train }},
+      <code>X_test</code>: {{ preview.shapes.X_test }},
+      <code>y_train</code>: {{ preview.shapes.y_train }},
+      <code>y_test</code>: {{ preview.shapes.y_test }}
+    </p>
+  {% endif %}
+
   <div class="row">
-    {% for key, df in preview.items() %}
-      <div class="col-md-6 mb-3">
+    {% for key, df in preview.items() if key != 'shapes' %}
+      <div class="col-md-6 mb-4">
         <h6 class="text-warning">{{ key }}</h6>
         <div class="table-responsive">
           {{ df.to_html(classes="table table-sm table-dark", index=False) | safe }}

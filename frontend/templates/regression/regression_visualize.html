@@ -3,60 +3,69 @@
 {% block regression_content %}
 <div class="card bg-dark border-secondary shadow-sm">
   <div class="card-body">
-    <h4 class="card-title text-info">📊 Visualize Your Data</h4>
-    <p class="text-muted">Choose up to 2 numeric columns and the type of plots you'd like to generate.</p>
+    <h4 class="card-title text-info mb-2">📊 Visualize Your Data</h4>
+    <p class="text-muted">Choose <strong>up to 2 numeric columns</strong> and one or more plot types to explore your dataset interactively.</p>
+
+    {% if message %}
+      <div class="alert alert-{{ message_type or 'info' }} mt-3">{{ message }}</div>
+    {% endif %}
 
     <form method="post" action="/regression/visualize">
       <div class="row g-4">
-
         <!-- Column Selection -->
         <div class="col-md-4">
-          <label class="form-label">Select up to 2 Columns</label>
-          {% for col in numeric_columns %}
-            <div class="form-check">
-              <input class="form-check-input column-checkbox" type="checkbox" name="selected_columns" value="{{ col }}">
-              <label class="form-check-label">{{ col }}</label>
-            </div>
-          {% endfor %}
-          <small class="text-muted d-block mt-2">Selected columns will define plot axes.</small>
+          <div class="border border-info-subtle rounded p-3 h-100">
+            <label class="form-label text-light">🧮 Select up to 2 Columns</label>
+            {% for col in numeric_columns %}
+              <div class="form-check">
+                <input class="form-check-input column-checkbox" type="checkbox" name="selected_columns" value="{{ col }}"
+                       {% if selected_columns and col in selected_columns %}checked{% endif %}>
+                <label class="form-check-label text-light">{{ col }}</label>
+              </div>
+            {% endfor %}
+            <small class="text-muted d-block mt-2">Tip: Use 2 columns to generate scatter plots.</small>
+          </div>
         </div>
 
         <!-- Plot Types -->
         <div class="col-md-4">
-          <label class="form-label">Select Plot Types</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="plot_types" value="scatter">
-            <label class="form-check-label">Scatter Plot</label>
+          <div class="border border-secondary rounded p-3 h-100">
+            <label class="form-label text-light">📐 Select Plot Type(s)</label>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="plot_types" value="scatter"
+                     {% if plot_types and 'scatter' in plot_types %}checked{% endif %}>
+              <label class="form-check-label text-light">Scatter Plot</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="plot_types" value="histogram"
+                     {% if plot_types and 'histogram' in plot_types %}checked{% endif %}>
+              <label class="form-check-label text-light">Histogram</label>
+            </div>
           </div>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="plot_types" value="histogram">
-            <label class="form-check-label">Histogram</label>
-          </div>
-          <!--<div class="form-check">
-            <input class="form-check-input" type="checkbox" name="plot_types" value="box">
-            <label class="form-check-label">Box Plot</label>
-          </div> -->
         </div>
 
-        <!-- Optional Scatter Limit -->
+        <!-- Optional Limit -->
         <div class="col-md-4">
-          <label for="scatter_limit" class="form-label">Limit (for Scatter Plot)</label>
-          <input type="number" class="form-control" name="scatter_limit" value="100" min="10" step="10">
+          <div class="border border-secondary rounded p-3 h-100">
+            <label class="form-label text-light">🔢 Limit (for Scatter Plot)</label>
+            <input type="number" class="form-control bg-dark text-light border-info" name="scatter_limit"
+                   value="{{ scatter_limit or 100 }}" min="10" step="10">
+            <small class="text-muted d-block mt-2">Defaults to 100 rows from dataset top.</small>
+          </div>
         </div>
       </div>
 
-      <!-- Submit Button -->
-      <div class="mt-4">
-        <button class="btn btn-outline-info" type="submit">Generate Visualizations</button>
+      <div class="mt-4 text-end">
+        <button class="btn btn-outline-info px-4" type="submit">📈 Generate Visualizations</button>
       </div>
     </form>
 
-    <!-- Rendered Plot Outputs -->
+    <!-- Rendered Plots -->
     {% if plots %}
       <hr class="my-4 border-light">
       <h5 class="text-light mb-3">🖼️ Generated Visualizations</h5>
       {% for plot_html in plots %}
-        <div class="mb-4">
+        <div class="mb-4 border rounded bg-black p-2 shadow-sm">
           {{ plot_html | safe }}
         </div>
       {% endfor %}
@@ -64,7 +73,7 @@
   </div>
 </div>
 
-<!-- JS: Limit column selection to max 2 -->
+<!-- JS: Enforce Max 2 Column Selection -->
 <script>
   const checkboxes = document.querySelectorAll('.column-checkbox');
   checkboxes.forEach(cb => {

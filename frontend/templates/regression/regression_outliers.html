@@ -3,56 +3,75 @@
 {% block regression_content %}
 <div class="card bg-dark border-secondary shadow-sm">
   <div class="card-body">
-    <h4 class="card-title text-info mb-3">🚨 Outlier Detection & Handling</h4>
-    <p class="text-muted">Choose columns and detection method to clean outliers from your dataset.</p>
+    <h4 class="card-title text-info mb-2">🚨 Outlier Detection & Handling</h4>
+    <p class="text-muted mb-3">Step 1: Select a numeric column to visualize. Step 2: Choose a cleaning strategy.</p>
 
-    <!-- Outlier Handling Form -->
-    <form action="/regression/outliers" method="post" class="row g-4">
-      <div class="col-md-6">
-        <label class="form-label">📈 Select Numeric Column</label>
+    {% if message %}
+      <div class="alert alert-{{ message_type or 'info' }} mt-3">{{ message }}</div>
+    {% endif %}
+
+    <!-- Step 1: Column Selection -->
+    <form action="/regression/outliers/visualize" method="post" class="row g-3 mb-4">
+      <div class="col-md-8">
+        <label class="form-label text-light">📈 Select Numeric Column</label>
         <select name="column_name" class="form-select" required>
           {% for col in numeric_columns %}
-            <option value="{{ col }}">{{ col }}</option>
+            <option value="{{ col }}" {% if col == selected_column %}selected{% endif %}>{{ col }}</option>
           {% endfor %}
         </select>
       </div>
-
-      <div class="col-md-6">
-        <label class="form-label">🧮 Choose Method</label>
-        <select name="method" class="form-select" required>
-          <option value="iqr">IQR Method</option>
-          <option value="zscore">Z-Score</option>
-          <option value="capping">Capping</option>
-        </select>
-      </div>
-
-      <div class="col-md-12 text-end">
-        <button class="btn btn-outline-warning" type="submit">🧹 Clean Outliers</button>
+      <div class="col-md-4 d-grid align-items-end">
+        <button class="btn btn-outline-info w-100">🔍 Visualize</button>
       </div>
     </form>
 
-    <!-- Results -->
-    {% if message %}
-      <div class="alert alert-info mt-4">{{ message }}</div>
+    {% if selected_column and suggested_method %}
+      <div class="alert alert-secondary">
+        💡 Based on the distribution of <code>{{ selected_column }}</code>,
+        we suggest using <strong class="text-info">{{ suggested_method.upper() }}</strong> method.
+      </div>
     {% endif %}
 
+    {% if plot_html %}
+      <hr class="border-secondary mt-4">
+      <h5 class="text-light mb-2">📊 Distribution of {{ selected_column }}</h5>
+      <div class="bg-dark border rounded-3 p-2">
+        {{ plot_html | safe }}
+      </div>
+    {% endif %}
+
+    <!-- Step 2: Apply Outlier Cleaning -->
+    {% if selected_column and plot_html %}
+    <form action="/regression/outliers/apply" method="post" class="row g-3 mt-4">
+      <input type="hidden" name="column_name" value="{{ selected_column }}">
+      <div class="col-md-8">
+        <label class="form-label text-light">🧮 Choose Cleaning Method</label>
+        <select name="method" class="form-select" required>
+          <option value="iqr">IQR Method (Remove)</option>
+          <option value="zscore">Z-Score (Remove)</option>
+          <option value="capping">Capping (Winsorize)</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-grid align-items-end">
+        <button class="btn btn-outline-warning w-100">🧹 Apply Cleaning</button>
+      </div>
+    </form>
+    {% endif %}
+
+    <!-- Summary Section -->
     {% if summary_before and summary_after %}
-    <hr class="border-secondary">
-    <h5 class="text-light">📊 Summary Before & After</h5>
-    <div class="row g-4">
-      <div class="col-md-6">
-        <h6 class="text-muted">Before Cleaning</h6>
-        <div class="table-responsive text-white">
-          {{ summary_before | safe }}
+      <hr class="border-secondary my-4">
+      <h5 class="text-light">📋 Comparison: Before vs After</h5>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <h6 class="text-muted">Before</h6>
+          <div class="table-responsive text-white">{{ summary_before | safe }}</div>
+        </div>
+        <div class="col-md-6">
+          <h6 class="text-muted">After</h6>
+          <div class="table-responsive text-white">{{ summary_after | safe }}</div>
         </div>
       </div>
-      <div class="col-md-6">
-        <h6 class="text-muted">After Cleaning</h6>
-        <div class="table-responsive text-white">
-          {{ summary_after | safe }}
-        </div>
-      </div>
-    </div>
     {% endif %}
   </div>
 </div>

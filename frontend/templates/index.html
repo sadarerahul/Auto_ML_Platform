@@ -3,22 +3,20 @@
 
 {% block content %}
 <!-- Hero Section -->
-<section class="hero">
+<section class="hero py-5 text-center">
   <div class="container fade-in">
     <h1 class="fw-bold">AI-Powered Predictive Analytics</h1>
     <p class="lead">Choose your workflow below to begin your journey.</p>
     <div class="d-flex justify-content-center mt-4 gap-3 flex-wrap">
       <a href="/regression" class="btn btn-lg btn-success px-5">Start Regression</a>
-      <button class="btn btn-lg btn-outline-secondary px-5" disabled>Time Series (Coming Soon)</button>
+      <button class="btn btn-lg btn-outline-secondary px-5" disabled title="Coming soon!">Time Series (Coming Soon)</button>
     </div>
   </div>
 </section>
 
-<div class="my-5"></div>
-
 <!-- Features Section -->
-<section id="features" class="py-5 bg-black">
-  <div class="container text-center">
+<section id="features" class="py-5 bg-black text-center">
+  <div class="container">
     <h2 class="mb-4">Key Features</h2>
     <div class="row g-4">
       <div class="col-md-4">
@@ -95,6 +93,14 @@
           </blockquote>
         </div>
       </div>
+
+      <!-- Carousel Controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
     </div>
   </div>
 </section>
@@ -103,15 +109,15 @@
 <section id="contact" class="py-5 bg-dark border-top">
   <div class="container">
     <h2 class="text-center mb-4">Request a Demo</h2>
-    <form class="row g-3 justify-content-center">
+    <form class="row g-3 justify-content-center" method="POST" action="/contact">
       <div class="col-md-4">
-        <input type="text" class="form-control" placeholder="Your Name">
+        <input type="text" class="form-control" name="name" placeholder="Your Name" required>
       </div>
       <div class="col-md-4">
-        <input type="email" class="form-control" placeholder="Your Email">
+        <input type="email" class="form-control" name="email" placeholder="Your Email" required>
       </div>
       <div class="col-md-8">
-        <textarea class="form-control" rows="3" placeholder="Tell us what you're looking for..."></textarea>
+        <textarea class="form-control" name="message" rows="3" placeholder="Tell us what you're looking for..." required></textarea>
       </div>
       <div class="col-md-4 d-grid">
         <button class="btn btn-outline-info btn-lg" type="submit">Send Request</button>

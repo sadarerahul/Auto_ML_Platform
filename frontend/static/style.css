@@ -1,118 +1,144 @@
 /* ---------------------------------------------------
-   style.css - Custom Styles for RPDS Platform (Dark Theme)
+   style.css - Enhanced RPDS Platform (Dark Theme)
    --------------------------------------------------- */
 
 /* Global Reset and Font */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #121212;
-    color: #f0f0f0;
-    line-height: 1.6;
-    margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #121212;
+  color: #f0f0f0;
+  line-height: 1.6;
+  margin: 0;
 }
 
-
+/* Typography & Links */
 .navbar-brand,
 .nav-link {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: #fff;
 }
 
 .nav-link:hover {
-    color: #d1d1d1 !important;
+  color: #d1d1d1 !important;
 }
 
 /* Hero Section */
 .hero {
-    background: url('https://images.unsplash.com/photo-1665686302311-fc5b8574258b?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat;
-    height: 90vh;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: center;
-    padding: 0 20px;
+  background: url('https://images.unsplash.com/photo-1665686302311-fc5b8574258b?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat;
+  height: 90vh;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 0 20px;
 }
 
 .hero h1 {
-    font-size: 3.5rem;
-    font-weight: 700;
+  font-size: 3.5rem;
+  font-weight: 700;
 }
 
 .hero .lead {
-    font-size: 1.25rem;
-    color: #e0e0e0;
+  font-size: 1.25rem;
+  color: #e0e0e0;
 }
 
 /* Animation */
 .fade-in {
-    animation: fadeIn 1.5s ease-in-out;
+  animation: fadeIn 1.5s ease-in-out;
 }
 
 @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(20px); }
-    100% { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Cards */
 .card {
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  background-color: #1f1f1f;
 }
 
 .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
 }
 
-/* Footer */
-footer {
-    background-color: #1e1e1e;
-    color: #ccc;
-    font-size: 0.9rem;
+/* Tables */
+.table-bordered th,
+.table-bordered td {
+  border-color: #3a3a3a;
+  color: #e0e0e0;
 }
 
-footer a {
-    color: #aaa;
-    text-decoration: none;
+.table thead th {
+  background-color: #1c1c1c;
+  color: #0dcaf0;
 }
 
-footer a:hover {
-    color: #fff;
+/* Forms */
+.form-control,
+.form-select {
+  background-color: #1e1e1e;
+  color: #fff;
+  border: 1px solid #444;
 }
 
-.footer-link {
-    display: block;
-    margin: 4px 0;
+.form-control:focus,
+.form-select:focus {
+  border-color: #0dcaf0;
+  box-shadow: 0 0 5px rgba(13, 202, 240, 0.5);
+}
+
+/* Alerts */
+.alert {
+  background-color: #2a2a2a;
+  border: 1px solid transparent;
+}
+
+.alert-info {
+  color: #0dcaf0;
+  background-color: #0dcaf014;
+  border-color: #0dcaf088;
+}
+
+.alert-warning {
+  color: #ffc107;
+  background-color: #ffc10714;
+  border-color: #ffc10788;
+}
+
+.alert-danger {
+  color: #dc3545;
+  background-color: #dc354514;
+  border-color: #dc354588;
+}
+
+.alert-success {
+  color: #198754;
+  background-color: #19875414;
+  border-color: #19875488;
 }
 
 /* Buttons */
 .btn-outline-info:hover {
-    background-color: #0dcaf0;
-    color: #000;
+  background-color: #0dcaf0;
+  color: #000;
 }
 
-/* Utility Classes */
-.text-info {
-    color: #0dcaf0 !important;
+.btn-outline-success:hover {
+  background-color: #198754;
+  color: #fff;
 }
 
-.bg-black {
-    background-color: #000 !important;
+.btn-outline-warning:hover {
+  background-color: #ffc107;
+  color: #000;
 }
 
-.border-info {
-    border-color: #0dcaf0 !important;
-}
-
-.border-success {
-    border-color: #198754 !important;
-}
-
-.border-warning {
-    border-color: #ffc107 !important;
-}
-
+/* Sidebar Navigation */
 .list-group-item-action {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -129,6 +155,7 @@ footer a:hover {
   font-weight: 600;
 }
 
+/* Progress Bar */
 .progress {
   background-color: #2e2e2e;
 }
@@ -138,4 +165,44 @@ footer a:hover {
   font-weight: 500;
 }
 
+/* Footer */
+footer {
+  background-color: #1e1e1e;
+  color: #ccc;
+  font-size: 0.9rem;
+}
 
+footer a {
+  color: #aaa;
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: #fff;
+}
+
+.footer-link {
+  display: block;
+  margin: 4px 0;
+}
+
+/* Utilities */
+.text-info {
+  color: #0dcaf0 !important;
+}
+
+.bg-black {
+  background-color: #000 !important;
+}
+
+.border-info {
+  border-color: #0dcaf0 !important;
+}
+
+.border-success {
+  border-color: #198754 !important;
+}
+
+.border-warning {
+  border-color: #ffc107 !important;
+}

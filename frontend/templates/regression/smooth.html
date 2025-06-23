@@ -1,0 +1,118 @@
+{% extends "regression.html" %}
+{% block title %}Smoothing – RPDS{% endblock %}
+
+{% block regression_content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<style>
+  select, button, input { padding: 0.45rem 0.7rem; margin-top: 0.4rem; }
+  .btn-rpds { background: #4caf50; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+  .btn-rpds:disabled { opacity: 0.6; cursor: not-allowed; }
+  .row-flex { display: flex; flex-wrap: wrap; gap: 1rem; align-items: end; }
+  #plot { width: 100%; height: 450px; margin-top: 1rem; }
+  .settings-group input { width: 4.5rem; margin-left: 0.5rem; }
+</style>
+
+<h5 class="text-info">
+  <i class="fa-solid fa-wave-square me-2"></i>Smoothing Filter
+  <small class="text-muted">(latest file: {{ dataset_name }})</small>
+</h5>
+
+<!-- 1️⃣ Column Selection -->
+<div class="row-flex">
+  <div>
+    <label for="columnSel">Numeric column:</label><br>
+    <select id="columnSel" class="form-select form-select-sm">
+      {% for col in columns %}
+        <option value="{{ col }}">{{ col }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button id="previewBtn" class="btn-rpds">Preview <i class="fa fa-play"></i></button>
+</div>
+
+<!-- 2️⃣ Smoothing Controls -->
+<div class="row-flex mt-3">
+  <div>
+    <label for="methodSel">Method:</label><br>
+    <select id="methodSel" class="form-select form-select-sm">
+      <option value="lowess">LOWESS</option>
+      <option value="median">Median</option>
+      <option value="hampel">Hampel</option>
+    </select>
+  </div>
+  <div class="text-secondary settings-group">
+    <div>
+      LOWESS frac<input type="number" id="frac" step="0.01" value="0.1">
+      | Median kernel<input type="number" id="kernel" value="5">
+      | Hampel window<input type="number" id="window" value="7"> 
+      nσ<input type="number" id="nsigma" step="0.1" value="3">
+    </div>
+  </div>
+  <button id="applyBtn" class="btn-rpds">Apply <i class="fa fa-check"></i></button>
+</div>
+
+<!-- 3️⃣ Chart & Download -->
+<div id="plot"></div>
+<p id="downloadZone" class="mt-2"></p>
+
+<script>
+const columnSel = document.getElementById('columnSel');
+const previewBtn = document.getElementById('previewBtn');
+const applyBtn = document.getElementById('applyBtn');
+const dlZone = document.getElementById('downloadZone');
+
+function draw(original, smoothed = null) {
+  const traces = [
+    { x: [...Array(original.length).keys()], y: original, mode: 'lines', name: 'Original' }
+  ];
+  if (smoothed) {
+    traces.push({ x: [...Array(smoothed.length).keys()], y: smoothed, mode: 'lines', name: 'Smoothed' });
+  }
+  Plotly.newPlot('plot', traces, {
+    title: 'Smoothing Visualization',
+    xaxis: { title: 'Index' },
+    yaxis: { title: 'Value' }
+  }, { responsive: true });
+}
+
+previewBtn.addEventListener('click', async () => {
+  try {
+    dlZone.innerHTML = '';
+    previewBtn.disabled = true;
+    const fd = new FormData();
+    fd.append('column', columnSel.value);
+    const r = await fetch('/regression/smooth/preview', { method: 'POST', body: fd });
+    const j = await r.json();
+    draw(j.y_raw);
+  } catch (e) {
+    alert("Failed to preview data.");
+  } finally {
+    previewBtn.disabled = false;
+  }
+});
+
+applyBtn.addEventListener('click', async () => {
+  try {
+    applyBtn.disabled = true;
+    const fd = new FormData();
+    fd.append('column', columnSel.value);
+    fd.append('method', document.getElementById('methodSel').value);
+    fd.append('frac', document.getElementById('frac').value);
+    fd.append('kernel', document.getElementById('kernel').value);
+    fd.append('window', document.getElementById('window').value);
+    fd.append('n_sigmas', document.getElementById('nsigma').value);
+
+    const r = await fetch('/regression/smooth/apply', { method: 'POST', body: fd });
+    const j = await r.json();
+    draw(j.y_raw, j.y_smooth);
+    dlZone.innerHTML = `✅ CSV ready: <a href="/regression/smooth/download/${j.out_file}" class="link-info">${j.out_file}</a>`;
+  } catch (e) {
+    alert("Smoothing failed. Please check parameters.");
+  } finally {
+    applyBtn.disabled = false;
+  }
+});
+</script>
+{% endblock %}
