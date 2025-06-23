@@ -1,0 +1,92 @@
+PassengerId,Pclass,Name,Sex,Age,SibSp,Parch,Ticket,Fare,Cabin,Embarked
+904,1,"Snyder, Mrs. John Pillsbury (Nelle Stevenson)",0,23.0,1,0,21228,82.2667,B45,2
+906,1,"Chaffee, Mrs. Herbert Fuller (Carrie Constance Toogood)",0,47.0,1,0,W.E.P. 5734,61.175,E31,2
+916,1,"Ryerson, Mrs. Arthur Larned (Emily Maria Borie)",0,48.0,1,3,PC 17608,262.375,B57 B59 B63 B66,0
+918,1,"Ostby, Miss. Helene Ragnhild",0,22.0,0,1,113509,61.9792,B36,0
+920,1,"Brady, Mr. John Bertram",1,41.0,0,0,113054,30.5,A21,2
+926,1,"Mock, Mr. Philipp Edmund",1,30.0,1,0,13236,57.75,C78,0
+933,1,"Franklin, Mr. Thomas Parham",1,27.0,0,0,113778,26.55,D34,2
+936,1,"Kimball, Mrs. Edwin Nelson Jr (Gertrude Parsons)",0,45.0,1,0,11753,52.5542,D19,2
+938,1,"Chevre, Mr. Paul Romaine",1,45.0,0,0,PC 17594,29.7,A9,0
+940,1,"Bucknell, Mrs. William Robert (Emma Eliza Ward)",0,60.0,0,0,11813,76.2917,D15,0
+942,1,"Smith, Mr. Lucien Philip",1,24.0,1,0,13695,60.0,C31,2
+945,1,"Fortune, Miss. Ethel Flora",0,28.0,3,2,19950,263.0,C23 C25 C27,2
+949,3,"Abelseth, Mr. Olaus Jorgensen",1,25.0,0,0,348122,7.65,F G63,2
+951,1,"Chaudanson, Miss. Victorine",0,36.0,0,0,PC 17608,262.375,B61,0
+956,1,"Ryerson, Master. John Borie",1,13.0,2,2,PC 17608,262.375,B57 B59 B63 B66,0
+960,1,"Tucker, Mr. Gilbert Milligan Jr",1,31.0,0,0,2543,28.5375,C53,0
+961,1,"Fortune, Mrs. Mark (Mary McDougald)",0,60.0,1,4,19950,263.0,C23 C25 C27,2
+965,1,"Ovies y Rodriguez, Mr. Servando",1,28.5,0,0,PC 17562,27.7208,D43,0
+966,1,"Geiger, Miss. Amalie",0,35.0,0,0,113503,211.5,C130,0
+967,1,"Keeping, Mr. Edwin",1,32.5,0,0,113503,211.5,C132,0
+969,1,"Cornell, Mrs. Robert Clifford (Malvina Helen Lamson)",0,55.0,2,0,11770,25.7,C101,2
+973,1,"Straus, Mr. Isidor",1,67.0,1,0,PC 17483,221.7792,C55 C57,2
+984,1,"Davidson, Mrs. Thornton (Orian Hays)",0,27.0,1,2,F.C. 12750,52.0,B71,2
+988,1,"Cavendish, Mrs. Tyrell William (Julia Florence Siegel)",0,76.0,1,0,19877,78.85,C46,2
+992,1,"Stengel, Mrs. Charles Emil Henry (Annie May Morris)",0,43.0,1,0,11778,55.4417,C116,0
+1001,2,"Swane, Mr. George",1,18.5,0,0,248734,13.0,F,2
+1004,1,"Evans, Miss. Edith Corse",0,36.0,0,0,PC 17531,31.6792,A29,0
+1006,1,"Straus, Mrs. Isidor (Rosalie Ida Blun)",0,63.0,1,0,PC 17483,221.7792,C55 C57,2
+1009,3,"Sandstrom, Miss. Beatrice Irene",0,1.0,1,1,PP 9549,16.7,G6,2
+1010,1,"Beattie, Mr. Thomson",1,36.0,0,0,13050,75.2417,C6,0
+1014,1,"Schabert, Mrs. Paul (Emma Mock)",0,35.0,1,0,13236,57.75,C28,0
+1023,1,"Gracie, Col. Archibald IV",1,53.0,0,0,113780,28.5,C51,0
+1034,1,"Ryerson, Mr. Arthur Larned",1,61.0,1,3,PC 17608,262.375,B57 B59 B63 B66,0
+1038,1,"Hilliard, Mr. Herbert Henry",1,27.0,0,0,17463,51.8625,E46,2
+1042,1,"Earnshaw, Mrs. Boulton (Olive Potter)",0,23.0,0,1,11767,83.1583,C54,0
+1048,1,"Bird, Miss. Ellen",0,29.0,0,0,PC 17483,221.7792,C97,2
+1050,1,"Borebank, Mr. John James",1,42.0,0,0,110489,26.55,D22,2
+1058,1,"Brandeis, Mr. Emil",1,48.0,0,0,PC 17591,50.4958,B10,0
+1069,1,"Stengel, Mr. Charles Emil Henry",1,54.0,1,0,11778,55.4417,C116,0
+1070,2,"Becker, Mrs. Allen Oliver (Nellie E Baumgardner)",0,36.0,0,3,230136,39.0,F4,2
+1071,1,"Compton, Mrs. Alexander Taylor (Mary Eliza Ingersoll)",0,64.0,0,2,PC 17756,83.1583,E45,0
+1073,1,"Compton, Mr. Alexander Taylor Jr",1,37.0,1,1,PC 17756,83.1583,E52,0
+1074,1,"Marvin, Mrs. Daniel Warner (Mary Graham Carmichael Farquarson)",0,18.0,1,0,113773,53.1,D30,2
+1076,1,"Douglas, Mrs. Frederick Charles (Mary Helene Baxter)",0,27.0,1,1,PC 17558,247.5208,B58 B60,0
+1088,1,"Spedden, Master. Robert Douglas",1,6.0,0,2,16966,134.5,E34,0
+1094,1,"Astor, Col. John Jacob",1,47.0,1,0,PC 17757,227.525,C62 C64,0
+1100,1,"Rosenbaum, Miss. Edith Louise",0,33.0,0,0,PC 17613,27.7208,A11,0
+1107,1,"Head, Mr. Christopher",1,42.0,0,0,113038,42.5,B11,2
+1110,1,"Widener, Mrs. George Dunton (Eleanor Elkins)",0,50.0,1,1,113503,211.5,C80,0
+1114,2,"Cook, Mrs. (Selena Rogers)",0,22.0,0,0,W./C. 14266,10.5,F33,2
+1126,1,"Cumings, Mr. John Bradley",1,39.0,1,0,PC 17599,71.2833,C85,0
+1128,1,"Warren, Mr. Frank Manley",1,64.0,1,0,110813,75.25,D37,0
+1131,1,"Douglas, Mrs. Walter Donald (Mahala Dutton)",0,48.0,1,0,PC 17761,106.425,C86,0
+1134,1,"Spedden, Mr. Frederic Oakley",1,45.0,1,1,16966,134.5,E34,0
+1137,1,"Kenyon, Mr. Frederick R",1,41.0,1,0,17464,51.8625,D21,2
+1144,1,"Clark, Mr. Walter Miller",1,27.0,1,0,13508,136.7792,C89,0
+1162,1,"McCaffry, Mr. Thomas Francis",1,46.0,0,0,13050,75.2417,C6,0
+1164,1,"Clark, Mrs. Walter Miller (Virginia McDowell)",0,26.0,1,0,13508,136.7792,C89,0
+1179,1,"Snyder, Mr. John Pillsbury",1,24.0,1,0,21228,82.2667,B45,2
+1180,3,"Mardirosian, Mr. Sarkis",1,27.0,0,0,2655,7.2292,F E46,0
+1185,1,"Dodge, Dr. Washington",1,53.0,1,1,33638,81.8583,A34,2
+1193,2,"Malachard, Mr. Noel",1,27.0,0,0,237735,15.0458,D,0
+1197,1,"Crosby, Mrs. Edward Gifford (Catherine Elizabeth Halstead)",0,64.0,1,1,112901,26.55,B26,2
+1198,1,"Allison, Mr. Hudson Joshua Creighton",1,30.0,1,2,113781,151.55,C22 C26,2
+1200,1,"Hays, Mr. Charles Melville",1,55.0,1,1,12749,93.5,B69,2
+1206,1,"White, Mrs. John Stuart (Ella Holmes)",0,55.0,0,0,PC 17760,135.6333,C32,0
+1208,1,"Spencer, Mr. William Augustus",1,57.0,1,0,PC 17569,146.5208,B78,0
+1213,3,"Krekorian, Mr. Neshan",1,25.0,0,0,2654,7.2292,F E57,0
+1214,2,"Nesson, Mr. Israel",1,26.0,0,0,244368,13.0,F2,2
+1218,2,"Becker, Miss. Ruth Elizabeth",0,12.0,2,1,230136,39.0,F4,2
+1223,1,"Dulles, Mr. William Crothers",1,39.0,0,0,PC 17580,29.7,A18,0
+1227,1,"Maguire, Mr. John Edward",1,30.0,0,0,110469,26.0,C106,2
+1235,1,"Cardeza, Mrs. James Warburton Martinez (Charlotte Wardle Drake)",0,58.0,0,1,PC 17755,512.3292,B51 B53 B55,0
+1242,1,"Greenfield, Mrs. Leo David (Blanche Strouse)",0,45.0,0,1,PC 17759,63.3583,D10 D12,0
+1247,1,"Julian, Mr. Henry Forbes",1,50.0,0,0,113044,26.0,E60,2
+1248,1,"Brown, Mrs. John Murray (Caroline Lane Lamson)",0,59.0,2,0,11769,51.4792,C101,2
+1256,1,"Harder, Mrs. George Achilles (Dorothy Annan)",0,25.0,1,0,11765,55.4417,E50,0
+1263,1,"Wilson, Miss. Helen Alice",0,31.0,0,0,16966,134.5,E39 E41,0
+1264,1,"Ismay, Mr. Joseph Bruce",1,49.0,0,0,112058,0.0,B52 B54 B56,2
+1266,1,"Dodge, Mrs. Washington (Ruth Vidaver)",0,54.0,1,1,33638,81.8583,A34,2
+1270,1,"Hipkins, Mr. William Edward",1,55.0,0,0,680,50.0,C39,2
+1282,1,"Payne, Mr. Vivian Ponsonby",1,23.0,0,0,12749,93.5,B24,2
+1283,1,"Lines, Mrs. Ernest H (Elizabeth Lindsey James)",0,51.0,0,1,PC 17592,39.4,D28,2
+1287,1,"Smith, Mrs. Lucien Philip (Mary Eloise Hughes)",0,18.0,1,0,13695,60.0,C31,2
+1289,1,"Frolicher-Stehli, Mrs. Maxmillian (Margaretha Emerentia Stehli)",0,48.0,1,1,13567,79.2,B41,0
+1292,1,"Bonnell, Miss. Caroline",0,30.0,0,0,36928,164.8667,C7,2
+1296,1,"Frauenthal, Mr. Isaac Gerald",1,43.0,1,0,17765,27.7208,D40,0
+1297,2,"Nourney, Mr. Alfred (Baron von Drachstedt"")""",1,20.0,0,0,SC/PARIS 2166,13.8625,D38,0
+1299,1,"Widener, Mr. George Dunton",1,50.0,1,1,113503,211.5,C80,0
+1303,1,"Minahan, Mrs. William Edward (Lillian E Thorpe)",0,37.0,1,0,19928,90.0,C78,1
+1306,1,"Oliva y Ocana, Dona. Fermina",0,39.0,0,0,PC 17758,108.9,C105,0

@@ -2,8 +2,11 @@
 
 import json, os
 from pathlib import Path
+import os 
 
-STATE_FILE = Path("frontend/static/xy_selection.json")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/uploads"))
+STATE_FILE = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/xy_selection.json"))
 
 def save_xy(x_cols: list[str], y_col: str) -> None:
     STATE_FILE.parent.mkdir(parents=True, exist_ok=True)

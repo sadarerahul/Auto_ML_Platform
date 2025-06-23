@@ -1,35 +1,45 @@
 {% extends "regression.html" %}
 
 {% block regression_content %}
-<h4 class="text-info mb-3">🤖 Model Selection & Evaluation</h4>
+<div class="card bg-dark border-secondary shadow-sm mb-4">
+  <div class="card-body">
+    <h4 class="card-title text-info mb-2">🤖 Model Selection & Evaluation</h4>
+    <p class="text-muted">Choose one or more models below to train and compare performance.</p>
 
-<form method="post" class="mb-4">
-  <p class="text-light">Select one or more models:</p>
-  <div class="row">
-    {% for key, pair in models.items() %}
-      <div class="col-md-6">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox"
-                 name="selected_models" id="m{{ loop.index }}" value="{{ key }}"
-                 {% if selected and key in selected %}checked{% endif %}>
-          <label class="form-check-label text-light" for="m{{ loop.index }}">
-            {{ pair[0] }}
-          </label>
+    <form method="post" class="mb-4">
+      <fieldset class="border rounded p-3">
+        <legend class="float-none w-auto text-light px-2">🧠 Available Models</legend>
+        <div class="row">
+          {% for key, pair in models.items() %}
+            <div class="col-md-6">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       name="selected_models" id="m{{ loop.index }}" value="{{ key }}"
+                       {% if selected and key in selected %}checked{% endif %}>
+                <label class="form-check-label text-light" for="m{{ loop.index }}">
+                  {{ pair[0] }}
+                </label>
+              </div>
+            </div>
+          {% endfor %}
         </div>
+      </fieldset>
+      <div class="text-end mt-3">
+        <button class="btn btn-outline-success" type="submit">🚀 Train & Evaluate</button>
       </div>
-    {% endfor %}
-  </div>
-  <button class="btn btn-outline-success mt-3" type="submit">🚀 Train & Evaluate</button>
-</form>
+    </form>
 
-{% if message %}
-  <div class="alert alert-info">{{ message }}</div>
-{% endif %}
+    {% if message %}
+      <div class="alert alert-info">{{ message }}</div>
+    {% endif %}
 
-{% if results_table %}
-  <h5 class="text-light">📊 Results</h5>
-  <div class="table-responsive">
-    {{ results_table | safe }}
+    {% if results_table %}
+      <hr class="border-secondary my-4">
+      <h5 class="text-light">📊 Evaluation Results</h5>
+      <div class="table-responsive">
+        {{ results_table | safe }}
+      </div>
+    {% endif %}
   </div>
-{% endif %}
+</div>
 {% endblock %}

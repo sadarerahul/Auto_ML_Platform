@@ -27,7 +27,7 @@ async def select_features_page(request: Request):
             "files": files,
             "active_file": active,
             "max_datasets": MAX_DATASETS,
-            **get_sidebar_context(active_file=active),
+            
         },
     )
 
@@ -64,7 +64,7 @@ async def run_feature_selection(
             "files": files,
             "active_file": active,
             "max_datasets": MAX_DATASETS,
-            **get_sidebar_context(active_file=active),
+            
         },
     )
 
@@ -92,6 +92,6 @@ async def save_xy_selection(
             "files": files,
             "active_file": active,
             "max_datasets": MAX_DATASETS,
-            **get_sidebar_context(active_file=active),
+            
         },
     )

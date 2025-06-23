@@ -1,9 +1,13 @@
 import pandas as pd
 from pathlib import Path
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
+import os
 
-SPLIT_DIR = Path("frontend/static/splits")
-SPLIT_DIR.mkdir(parents=True, exist_ok=True)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/uploads"))
+SPLIT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/splits"))
+os.makedirs(SPLIT_DIR, exist_ok=True)
+
 
 def _load_split(name: str) -> pd.DataFrame:
     path = SPLIT_DIR / f"{name}.csv"

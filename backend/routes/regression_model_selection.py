@@ -1,7 +1,9 @@
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-import os, pandas as pd
+import os
+from typing import Optional
+
 from backend.utils.regression.context import get_sidebar_context
 from backend.utils.regression.model_selection import available_models, train_and_evaluate
 from backend.services import dataset_service
@@ -14,8 +16,9 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 # ---------- GET ----------
 @router.get("/regression/model", response_class=HTMLResponse)
 async def model_page(request: Request):
-    files  = dataset_service.list_files()
+    files = dataset_service.list_files()
     active = files[-1] if files else None
+
     return templates.TemplateResponse(
         "regression/model_selection.html",
         {
@@ -33,16 +36,33 @@ async def model_page(request: Request):
 @router.post("/regression/model", response_class=HTMLResponse)
 async def train_models(
     request: Request,
-    selected_models: list[str] = Form(...),   # checkbox values
+    selected_models: Optional[list[str]] = Form(None),
 ):
-    files  = dataset_service.list_files()
+    files = dataset_service.list_files()
     active = files[-1] if files else None
+
+    if not selected_models:
+        message = "⚠️ Please select at least one model to train."
+        return templates.TemplateResponse(
+            "regression/model_selection.html",
+            {
+                "request": request,
+                "page": "model",
+                "models": available_models(),
+                "message": message,
+                "files": files,
+                "active_file": active,
+                "max_datasets": MAX_DATASETS,
+                **get_sidebar_context(active_file=active),
+            },
+        )
+
     try:
         results_df = train_and_evaluate(selected_models)
         table_html = results_df.to_html(classes="table table-dark table-sm", index=False)
-        message = "✅ Training finished. Pickle files saved in static/models/."
+        message = "✅ Training finished. Models saved in static/models/"
     except Exception as e:
-        table_html, message = None, f"❌ Error: {e}"
+        table_html, message = None, f"❌ Error during training: {e}"
 
     return templates.TemplateResponse(
         "regression/model_selection.html",
