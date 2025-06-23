@@ -1,7 +1,15 @@
 {
   "X": [
-    "YearsExperience",
-    "Age"
+    "PassengerId",
+    "Pclass",
+    "Sex",
+    "Age",
+    "SibSp",
+    "Parch",
+    "Ticket",
+    "Fare",
+    "Cabin",
+    "Embarked"
   ],
-  "y": "Salary"
+  "y": "Survived"
 }

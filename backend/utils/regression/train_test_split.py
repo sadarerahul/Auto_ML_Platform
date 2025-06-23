@@ -29,11 +29,10 @@ def perform_split(test_size: float, random_state: int, preview_rows: int = 5):
     )
 
     # Save splits
-    X_train.to_csv(SPLIT_DIR / "X_train.csv", index=False)
-    X_test.to_csv(SPLIT_DIR / "X_test.csv", index=False)
-    y_train.to_csv(SPLIT_DIR / "y_train.csv", index=False, header=True)
-    y_test.to_csv(SPLIT_DIR / "y_test.csv", index=False, header=True)
-
+    X_train.to_csv(os.path.join(SPLIT_DIR, "X_train.csv"), index=False)
+    X_test.to_csv(os.path.join(SPLIT_DIR, "X_test.csv"), index=False)
+    y_train.to_csv(os.path.join(SPLIT_DIR, "y_train.csv"), index=False, header=True)
+    y_test.to_csv(os.path.join(SPLIT_DIR, "y_test.csv"), index=False,header=True)
     # Previews
     return {
         "X_train": X_train.head(preview_rows),
