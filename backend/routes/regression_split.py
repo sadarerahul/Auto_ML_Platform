@@ -2,8 +2,6 @@ from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
-from typing import Optional
-
 from backend.utils.regression.context import get_sidebar_context
 from backend.utils.regression import train_test_split as tts
 from backend.utils.regression.selection_state import load_xy
@@ -20,7 +18,6 @@ async def split_page(request: Request):
     files = dataset_service.list_files()
     active = files[-1] if files else None
     xy_state = load_xy()
-
     return templates.TemplateResponse(
         "regression/train_test_split.html",
         {
@@ -38,32 +35,20 @@ async def split_page(request: Request):
 @router.post("/regression/split", response_class=HTMLResponse)
 async def do_split(
     request: Request,
-    test_size_predefined: Optional[str] = Form(None),
-    test_size_manual: Optional[str] = Form(None),
+    test_size_predefined: float = Form(None),
+    test_size_manual: float = Form(None),
     random_state: int = Form(42),
 ):
-    # Safely parse test size
-    try:
-        if test_size_manual and test_size_manual.strip():
-            test_size = float(test_size_manual)
-        elif test_size_predefined and test_size_predefined.strip():
-            test_size = float(test_size_predefined)
-        else:
-            test_size = 0.2
-    except ValueError:
-        test_size = 0.2
+    # Prioritize manual input if present
+    test_size = test_size_manual if test_size_manual else test_size_predefined
+    if test_size is None:
+        test_size = 0.2  # default fallback
 
     files = dataset_service.list_files()
     active = files[-1] if files else None
-    xy_state = load_xy()
-
     try:
-        preview = tts.perform_split(
-            test_size=test_size,
-            random_state=random_state,
-            preview_rows=5
-        )
-        message = f"✅ Split complete — Test size: {test_size}"
+        preview = tts.perform_split(test_size, random_state)
+        message = f"✅ Split complete. Test size: {test_size}"
     except Exception as e:
         preview, message = None, f"❌ Error: {e}"
 
@@ -72,7 +57,7 @@ async def do_split(
         {
             "request": request,
             "page": "split",
-            "xy_state": xy_state,
+            "xy_state": load_xy(),
             "preview": preview,
             "message": message,
             "files": files,

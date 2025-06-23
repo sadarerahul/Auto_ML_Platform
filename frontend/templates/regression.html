@@ -37,14 +37,19 @@
            class="list-group-item list-group-item-action ps-5 {% if page == 'outliers' %}active{% endif %}">
           🚨 Outlier Handling
         </a>
-        <a href="/regression/scale"
-           class="list-group-item list-group-item-action ps-5 {% if page == 'scale' %}active{% endif %}">
-          📏 Scaling
-        </a>
         <a href="/regression/select_features"
            class="list-group-item list-group-item-action ps-5 {% if page == 'select_features' %}active{% endif %}">
           🧠 Feature Selection
         </a>
+        <a href="/regression/split"
+         class="list-group-item list-group-item-action ps-5 {% if page == 'split' %}active{% endif %}">
+        <i class="fas fa-random me-2"></i>Train‑Test Split
+      </a>
+        <a href="/regression/scale"
+           class="list-group-item list-group-item-action ps-5 {% if page == 'scale' %}active{% endif %}">
+          📏 Scaling
+        </a>
+        
         <a href="/regression/pca"
            class="list-group-item list-group-item-action ps-5 {% if page == 'pca' %}active{% endif %}">
           🧮 PCA (Optional)
@@ -52,21 +57,18 @@
       </div>
 
       <!-- 3️⃣‑6️⃣ Other steps -->
-      <a href="/regression/split"
-         class="list-group-item list-group-item-action {% if page == 'split' %}active{% endif %}">
-        <i class="fas fa-random me-2"></i>3️⃣ Train‑Test Split
-      </a>
+      
       <a href="/regression/model"
          class="list-group-item list-group-item-action {% if page == 'model' %}active{% endif %}">
-        <i class="fas fa-cogs me-2"></i>4️⃣ Model Selection
+        <i class="fas fa-cogs me-2"></i>3️⃣ Model Selection
       </a>
       <a href="/regression/train"
          class="list-group-item list-group-item-action {% if page == 'train' %}active{% endif %}">
-        <i class="fas fa-play-circle me-2"></i>5️⃣ Train & Evaluate
+        <i class="fas fa-play-circle me-2"></i>4️⃣ Hyperparameter_tuninig
       </a>
       <a href="/regression/predict"
          class="list-group-item list-group-item-action {% if page == 'predict' %}active{% endif %}">
-        <i class="fas fa-magic me-2"></i>6️⃣ Predict New Data
+        <i class="fas fa-magic me-2"></i>5️⃣ Predict New Data
       </a>
     </div>
 

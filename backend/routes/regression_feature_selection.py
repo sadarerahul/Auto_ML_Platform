@@ -7,7 +7,6 @@ from backend.utils.regression import feature_selection as fs
 from backend.utils.regression.selection_state import load_xy, save_xy
 from backend.services import dataset_service
 from backend.config import MAX_DATASETS
-from backend.utils.regression.session_state import get_active_dataset
 
 router = APIRouter()
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "../../frontend/templates")
@@ -16,9 +15,8 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 # ---------- GET ----------
 @router.get("/regression/select_features", response_class=HTMLResponse)
 async def select_features_page(request: Request):
-    active = get_active_dataset()
     files = dataset_service.list_files()
-
+    active = files[-1] if files else None
     return templates.TemplateResponse(
         "regression/feature_selection.html",
         {
