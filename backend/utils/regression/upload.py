@@ -60,13 +60,18 @@ async def save_uploaded_file(file: UploadFile, file_type="csv"):
         filename = file.filename
         original_path, cleaned_path = _get_data_paths(filename)
 
+        # ✅ Save original file
         df.to_csv(original_path, index=False)
 
-        # 🔒 Cleaned data is internal — we never create or delete it during upload
+        # ✅ ALSO save it as 'recent.csv' so EDA can use it
+        recent_path = os.path.join(UPLOAD_DIR, "recent.csv")
+        df.to_csv(recent_path, index=False)
+
+        # ✅ Track the active dataset for sidebar context
         set_active_dataset(filename)
         return df, "✅ File uploaded successfully!"
     except Exception:
-        return None, "✅ File uploaded successfully! Choose the dataset from sidebar"
+        return None, "❌ Error uploading file"
 
 # --------------------------------------------
 # ✅ Return column names from active dataset

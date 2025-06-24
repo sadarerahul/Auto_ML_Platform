@@ -1,0 +1,119 @@
+{% extends "regression.html" %}
+
+{% block regression_content %}
+<div class="container mt-4">
+    <h2>Exploratory Data Analysis Dashboard</h2>
+
+    {% if error %}
+    <div class="alert alert-warning">{{ error }}</div>
+    {% endif %}
+
+    {% if overview %}
+    <div class="card mb-3">
+        <div class="card-header">Dataset Overview</div>
+        <div class="card-body">
+            <p><strong>Shape:</strong> {{ overview.shape }}</p>
+            <p><strong>Rows:</strong> {{ overview.n_rows }}, <strong>Columns:</strong> {{ overview.n_cols }}</p>
+            <ul>
+                {% for col in overview.columns %}
+                <li>{{ col.Column }} - {{ col.Dtype }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <form method="post" action="/regression/eda">
+        <button type="submit" class="btn btn-primary">Describe Dataset</button>
+    </form>
+
+    {% if describe %}
+    <div class="accordion mt-4" id="describeAccordion">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSummary">
+                    Summary Statistics
+                </button>
+            </h2>
+            <div id="collapseSummary" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    {{ describe.summary | safe }}
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMissing">
+                    Missing Values Info
+                </button>
+            </h2>
+            <div id="collapseMissing" class="accordion-collapse collapse">
+                <div class="accordion-body">
+                    {{ describe.missing | safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if univariate %}
+    <h4 class="mt-5">Univariate Analysis</h4>
+    {% for plot in univariate %}
+    <iframe src="{{ plot }}" height="400" width="100%" frameborder="0"></iframe>
+    {% endfor %}
+    {% endif %}
+
+    {% if multivariate %}
+    <h4 class="mt-5">Multivariate Analysis</h4>
+    {% for plot in multivariate %}
+        {% if plot.endswith('.html') %}
+        <iframe src="{{ plot }}" height="400" width="100%" frameborder="0"></iframe>
+        {% else %}
+        <img src="{{ plot }}" class="img-fluid mt-3" />
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    {% if columns %}
+    <div class="card my-4">
+        <div class="card-header">Target-Based Filtering</div>
+        <div class="card-body">
+            <form method="post" action="/regression/eda/filter">
+                <div class="row mb-2">
+                    <div class="col">
+                        <label for="target_column" class="form-label">Target Column</label>
+                        <select class="form-select" name="target_column" required>
+                            {% for col in columns %}
+                            <option value="{{ col }}">{{ col }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="lower_percentile" class="form-label">Lower Percentile (%)</label>
+                        <input type="number" name="lower_percentile" class="form-control" min="0" max="100" step="any" value="25">
+                    </div>
+                    <div class="col">
+                        <label for="upper_percentile" class="form-label">Upper Percentile (%)</label>
+                        <input type="number" name="upper_percentile" class="form-control" min="0" max="100" step="any" value="75">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-outline-success">Apply Target-Based Filter</button>
+            </form>
+        </div>
+    </div>
+    {% if filtered_file %}
+        <a href="/static/uploads/{{ filtered_file }}" class="btn btn-sm btn-outline-primary mt-2" download>
+            Download Filtered Dataset
+        </a>
+    {% endif %}
+
+    {% endif %}
+
+    {% if filter_shape %}
+    <div class="alert alert-info mt-3">
+        <strong>Filtered Dataset Shape:</strong> {{ filter_shape }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
