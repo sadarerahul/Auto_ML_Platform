@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from backend.utils.regression.session_state import get_active_dataset
+from backend.utils.regression.session_state import get_active_dataset, set_active_dataset
 
 # 📁 Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,18 +24,21 @@ def load_data():
     if not original_path:
         return pd.DataFrame()
 
-    if os.path.exists(cleaned_path) and os.path.exists(original_path):
-        if os.path.getmtime(cleaned_path) >= os.path.getmtime(original_path):
-            return pd.read_csv(cleaned_path)
+    if os.path.exists(cleaned_path):
+        return pd.read_csv(cleaned_path)
+
     if os.path.exists(original_path):
         return pd.read_csv(original_path)
+
     return pd.DataFrame()
 
-# 💾 Save cleaned data securely
+# 💾 Save cleaned data securely & activate it
 def save_data(df: pd.DataFrame):
     _, cleaned_path = _get_data_paths()
     if cleaned_path:
         df.head(500).to_csv(cleaned_path, index=False)
+        cleaned_name = os.path.basename(cleaned_path)
+        set_active_dataset(cleaned_name)  # ✅ Make cleaned file active
 
 # ❓ Get columns with missing values
 def get_missing_columns():
@@ -115,4 +118,7 @@ def apply_encoding(column, encoding_type):
 # 🔍 Preview cleaned data (for display)
 def get_cleaned_data_preview(n=10):
     df = load_data()
-    return df.head(n).to_html(classes="table table-sm table-bordered", index=False)
+    if df.empty:
+        return "<p class='text-warning mb-0'>⚠️ No data available to preview.</p>"
+    return f"<p class='text-success mb-2'>✅ Showing cleaned data preview:</p>" + \
+           df.head(n).to_html(classes="table table-sm table-bordered", index=False)

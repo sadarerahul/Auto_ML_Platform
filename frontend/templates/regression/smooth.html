@@ -30,6 +30,7 @@
     </select>
   </div>
   <button id="previewBtn" class="btn-rpds">Preview <i class="fa fa-play"></i></button>
+  <button id="clearBtn" class="btn-rpds">Clear All <i class="fa fa-trash"></i></button>
 </div>
 
 <!-- 2️⃣ Smoothing Controls -->
@@ -46,7 +47,7 @@
     <div>
       LOWESS frac<input type="number" id="frac" step="0.01" value="0.1">
       | Median kernel<input type="number" id="kernel" value="5">
-      | Hampel window<input type="number" id="window" value="7"> 
+      | Hampel window<input type="number" id="window" value="7">  
       nσ<input type="number" id="nsigma" step="0.1" value="3">
     </div>
   </div>
@@ -59,21 +60,36 @@
 
 <script>
 const columnSel = document.getElementById('columnSel');
+const methodSel = document.getElementById('methodSel');
 const previewBtn = document.getElementById('previewBtn');
 const applyBtn = document.getElementById('applyBtn');
+const clearBtn = document.getElementById('clearBtn');
 const dlZone = document.getElementById('downloadZone');
 
-function draw(original, smoothed = null) {
+let originalY = [];
+let overlayLines = [];
+
+function drawPlot() {
   const traces = [
-    { x: [...Array(original.length).keys()], y: original, mode: 'lines', name: 'Original' }
+    {
+      x: [...Array(originalY.length).keys()],
+      y: originalY,
+      mode: 'lines',
+      name: 'Original',
+      line: { color: 'black', width: 2 }
+    },
+    ...overlayLines.map(line => ({
+      x: [...Array(line.y.length).keys()],
+      y: line.y,
+      mode: 'lines',
+      name: line.label
+    }))
   ];
-  if (smoothed) {
-    traces.push({ x: [...Array(smoothed.length).keys()], y: smoothed, mode: 'lines', name: 'Smoothed' });
-  }
   Plotly.newPlot('plot', traces, {
-    title: 'Smoothing Visualization',
+    title: 'Smoothing Comparison',
     xaxis: { title: 'Index' },
-    yaxis: { title: 'Value' }
+    yaxis: { title: 'Value' },
+    legend: { orientation: "h" }
   }, { responsive: true });
 }
 
@@ -85,7 +101,9 @@ previewBtn.addEventListener('click', async () => {
     fd.append('column', columnSel.value);
     const r = await fetch('/regression/smooth/preview', { method: 'POST', body: fd });
     const j = await r.json();
-    draw(j.y_raw);
+    originalY = j.y_raw;
+    overlayLines = [];
+    drawPlot();
   } catch (e) {
     alert("Failed to preview data.");
   } finally {
@@ -98,21 +116,31 @@ applyBtn.addEventListener('click', async () => {
     applyBtn.disabled = true;
     const fd = new FormData();
     fd.append('column', columnSel.value);
-    fd.append('method', document.getElementById('methodSel').value);
+    fd.append('method', methodSel.value);
     fd.append('frac', document.getElementById('frac').value);
     fd.append('kernel', document.getElementById('kernel').value);
     fd.append('window', document.getElementById('window').value);
     fd.append('n_sigmas', document.getElementById('nsigma').value);
+    fd.append('clear', false); // append this flag to preserve previous lines
 
     const r = await fetch('/regression/smooth/apply', { method: 'POST', body: fd });
     const j = await r.json();
-    draw(j.y_raw, j.y_smooth);
+    originalY = j.y_raw;
+    overlayLines = j.lines;
+    drawPlot();
     dlZone.innerHTML = `✅ CSV ready: <a href="/regression/smooth/download/${j.out_file}" class="link-info">${j.out_file}</a>`;
   } catch (e) {
-    alert("Smoothing failed. Please check parameters.");
+    alert("Smoothing failed.");
   } finally {
     applyBtn.disabled = false;
   }
+});
+
+clearBtn.addEventListener('click', () => {
+  originalY = [];
+  overlayLines = [];
+  Plotly.purge('plot');
+  dlZone.innerHTML = '';
 });
 </script>
 {% endblock %}

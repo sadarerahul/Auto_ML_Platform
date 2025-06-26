@@ -1,13 +1,14 @@
 {% extends "regression.html" %}
 
 {% block regression_content %}
-<div class="card bg-dark border-secondary shadow-sm">
+<div class="card bg-dark border-secondary shadow">
   <div class="card-body">
-    <h4 class="card-title text-info">📁 Upload Your Dataset</h4>
-    <p class="text-muted mb-4">Upload a CSV or Excel file to begin working with regression tools.</p>
+    <!-- 🔹 Title -->
+    <h3 class="text-info mb-2"><i class="fas fa-upload me-2"></i>Upload Dataset</h3>
+    <p class="text-muted mb-4">Upload a <strong>CSV</strong> or <strong>Excel</strong> file (max 500 rows displayed) to get started with the regression workflow.</p>
 
-    <!-- 🔼 Upload Form -->
-    <form action="/regression/upload" method="post" enctype="multipart/form-data" class="mb-4">
+    <!-- 📤 Upload Form -->
+      <form action="/regression/upload" method="post" enctype="multipart/form-data" class="mb-4">
         <div class="row g-3 align-items-center">
           <!-- File Input -->
           <div class="col-md-8">
@@ -25,18 +26,18 @@
         </div>
       </form>
 
-    <!-- 🔔 Feedback Message -->
+    <!-- ✅ Feedback Message -->
     {% if message %}
-      <div class="alert alert-info mt-4">
-        {{ message }}
+      <div class="alert alert-info border-info shadow-sm mt-3">
+        <i class="fas fa-info-circle me-2"></i>{{ message }}
       </div>
     {% endif %}
 
-    <!-- 📄 Table Preview -->
+    <!-- 🧾 Preview Table -->
     {% if preview_table %}
       <hr class="border-secondary mt-5">
-      <h5 class="text-light mb-3">🧾 Data Preview (First Few Rows)</h5>
-      <div class="table-responsive">
+      <h5 class="text-light mb-3"><i class="fas fa-table me-2"></i>Preview of Uploaded Data</h5>
+      <div class="table-responsive border rounded shadow-sm">
         {{ preview_table | safe }}
       </div>
     {% endif %}

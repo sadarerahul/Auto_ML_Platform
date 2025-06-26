@@ -38,8 +38,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Custom Value <small class="text-muted">(optional)</small></label>
-              <input type="text" class="form-control" name="custom_value" placeholder="Only used if strategy = custom">
+              <label class="form-label">Custom Value <small class="text-muted">(only used if selected)</small></label>
+              <input type="text" class="form-control" name="custom_value" placeholder="e.g., 0, unknown, N/A">
             </div>
             <div class="d-grid">
               <button type="submit" class="btn btn-outline-warning">🧹 Clean Missing</button>
@@ -69,7 +69,7 @@
               <select class="form-select" name="strategy" required>
                 <option value="onehot">One-Hot Encoding</option>
                 <option value="label">Label Encoding</option>
-                <option value="freq">Frequency Encoding</option>
+                <option value="frequency">Frequency Encoding</option>
               </select>
             </div>
             <div class="d-grid">

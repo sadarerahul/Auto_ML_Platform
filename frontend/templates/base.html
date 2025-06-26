@@ -5,66 +5,81 @@
   <title>{% block title %}RPDS Platform{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/static/favicon.png">
+
   <!-- Bootstrap & Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Custom Styling -->
   <link href="/static/style.css" rel="stylesheet">
 </head>
 <body>
 
-<!-- 🌐 Sticky Header -->
-<header class="sticky-top bg-dark shadow-sm">
-  <nav class="navbar navbar-expand-lg navbar-dark container">
-    <a class="navbar-brand fw-bold" href="/">
-      <i class="fas fa-robot me-2 text-info"></i>RPDS AI
+<!-- 🌐 Sticky Navigation Header -->
+<header class="sticky-top bg-dark shadow-sm" style="backdrop-filter: blur(6px);">
+  <nav class="navbar navbar-expand-lg navbar-dark container py-2">
+    <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+      <i class="fas fa-robot text-info me-2"></i><span>RPDS AI</span>
     </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navMenu">
-      <ul class="navbar-nav ms-auto me-3">
-        <li class="nav-item"><a class="nav-link {% if page == 'home' %}active{% endif %}" href="/">Home</a></li>
-        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
-        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+
+    <div class="collapse navbar-collapse justify-content-end" id="navMenu">
+      <ul class="navbar-nav me-3">
+        <li class="nav-item">
+          <a class="nav-link {% if page == 'home' %}active{% endif %}" href="/" aria-current="{% if page == 'home' %}page{% endif %}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#features">Features</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#about">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/#contact">Contact</a>
+        </li>
       </ul>
-      <a class="btn btn-outline-info" href="/regression">🚀 Try Now</a>
+      <a class="btn btn-outline-info rounded-pill px-4" href="/regression">🚀 Try Now</a>
     </div>
   </nav>
 </header>
 
-<!-- 🌟 Page Content -->
-<main class="container my-5">
+<!-- 🌟 Main Content Area -->
+<main class="container py-5 px-3">
   {% block content %}
   <!-- Page-specific content goes here -->
   {% endblock %}
 </main>
 
 <!-- ⚡ Footer -->
-<footer class="bg-black text-light pt-5 pb-3 border-top">
+<footer class="bg-black text-light pt-5 pb-3 border-top border-secondary">
   <div class="container">
     <div class="row text-md-start text-center">
 
       <!-- Company Info -->
       <div class="col-md-4 mb-4">
-        <h5 class="text-info">RPDS AI</h5>
-        <p class="text-muted">Next-gen machine learning automation for industry-ready predictive analytics.</p>
+        <h5 class="text-info fw-bold mb-2">RPDS AI</h5>
+        <p class="text-muted small">Next-gen machine learning automation for industry-ready predictive analytics. Built for engineers & analysts.</p>
       </div>
 
       <!-- Quick Links -->
       <div class="col-md-4 mb-4">
-        <h6 class="fw-bold">Quick Links</h6>
-        <ul class="list-unstyled">
+        <h6 class="fw-semibold mb-3">Quick Links</h6>
+        <ul class="list-unstyled small">
           <li><a href="/" class="text-muted footer-link">Home</a></li>
-          <li><a href="#features" class="text-muted footer-link">Features</a></li>
-          <li><a href="#about" class="text-muted footer-link">About</a></li>
-          <li><a href="#contact" class="text-muted footer-link">Contact</a></li>
+          <li><a href="/#features" class="text-muted footer-link">Features</a></li>
+          <li><a href="/#about" class="text-muted footer-link">About</a></li>
+          <li><a href="/#contact" class="text-muted footer-link">Contact</a></li>
         </ul>
       </div>
 
       <!-- Contact Info -->
       <div class="col-md-4 mb-4">
-        <h6 class="fw-bold">Contact</h6>
+        <h6 class="fw-semibold mb-3">Contact</h6>
         <p class="text-muted small mb-1"><i class="fas fa-envelope me-2"></i>support@rpds.ai</p>
         <p class="text-muted small"><i class="fas fa-map-marker-alt me-2"></i>Pune, Maharashtra, India</p>
         <div class="mt-2">
@@ -73,10 +88,9 @@
           <a href="#" class="text-muted"><i class="fab fa-github fa-lg"></i></a>
         </div>
       </div>
-
     </div>
 
-    <hr class="border-secondary">
+    <hr class="border-secondary my-4">
     <div class="text-center small text-muted">
       © 2025 RPDS AI. All rights reserved |
       <a href="#" class="text-muted footer-link">Privacy Policy</a> |
@@ -85,8 +99,8 @@
   </div>
 </footer>
 
-<!-- JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
 
 </body>
 </html>

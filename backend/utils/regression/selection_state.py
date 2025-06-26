@@ -1,6 +1,6 @@
 """
 Persist / retrieve the user-chosen predictor columns (X) and target (y).
-Safe against earlier “directory named *.json*” mistake.
+Safe against earlier “directory named .json” mistake.
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ STATE_FILE = STATIC_DIR / "xy_selection.json"           # <-- file, not dir!
 # Ensure parent directory exists (creates …/static if missing)
 STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-# If a *directory* with this name was created by mistake, remove it
+# If a directory with this name was created by mistake, remove it
 if STATE_FILE.exists() and STATE_FILE.is_dir():
     # remove empty dir; or rmdir(dir, ignore_errors=True) if needed
     STATE_FILE.rmdir()

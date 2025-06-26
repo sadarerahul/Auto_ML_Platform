@@ -13,7 +13,8 @@ from backend.routes import (
     regression_scale,
     regression_model_selection,
     regression_predication,
-    regression_smoothing
+    regression_smoothing,
+    eda_dashboard,
 )
 
 
@@ -35,3 +36,4 @@ app.include_router(regression_scale.router)
 app.include_router(regression_model_selection.router)
 app.include_router(regression_predication.router)
 app.include_router(regression_smoothing.router)
+app.include_router(eda_dashboard.router)

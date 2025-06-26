@@ -1,15 +1,8 @@
 {
   "X": [
-    "PassengerId",
-    "Pclass",
-    "Sex",
-    "Age",
-    "SibSp",
-    "Parch",
-    "Ticket",
-    "Fare",
-    "Cabin",
-    "Embarked"
+    "age",
+    "bmi",
+    "children"
   ],
-  "y": "Survived"
+  "y": "charges"
 }
