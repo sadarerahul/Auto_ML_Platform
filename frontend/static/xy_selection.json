@@ -1,9 +1,8 @@
 {
   "X": [
-    "Age",
-    "Education Level",
-    "Job Title",
-    "Years of Experience"
+    "age",
+    "bmi",
+    "children"
   ],
-  "y": "Salary"
+  "y": "charges"
 }

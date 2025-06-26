@@ -25,7 +25,7 @@ def lowess_smooth(series: pd.Series, frac: float = 0.1, preserve_nans: bool = Tr
         Smoothed series aligned to original index.
     """
     if not 0 < frac < 1:
-        raise ValueError("LOWESS frac must be between 0 and 1.")
+        raise ValueError("LOWESS `frac` must be between 0 and 1.")
 
     if preserve_nans:
         not_null = series.dropna()
@@ -56,7 +56,7 @@ def median_filter(series: pd.Series, kernel: int = 5) -> pd.Series:
         Smoothed series using local medians.
     """
     if kernel < 1:
-        raise ValueError("Median filter kernel must be positive.")
+        raise ValueError("Median filter `kernel` must be positive.")
     if kernel % 2 == 0:
         kernel += 1  # enforce odd size
     smoothed = medfilt(series.values, kernel_size=kernel)
@@ -83,7 +83,7 @@ def hampel_filter(series: pd.Series, window: int = 7, n_sigmas: float = 3.0) -> 
         Series with outliers replaced by median.
     """
     if window < 1:
-        raise ValueError("Hampel window size must be positive.")
+        raise ValueError("Hampel `window` size must be positive.")
     if window % 2 == 0:
         window += 1
 

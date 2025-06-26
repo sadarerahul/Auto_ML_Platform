@@ -128,7 +128,7 @@ applyBtn.addEventListener('click', async () => {
     originalY = j.y_raw;
     overlayLines = j.lines;
     drawPlot();
-    dlZone.innerHTML = ✅ CSV ready: <a href="/regression/smooth/download/${j.out_file}" class="link-info">${j.out_file}</a>;
+    dlZone.innerHTML = `✅ CSV ready: <a href="/regression/smooth/download/${j.out_file}" class="link-info">${j.out_file}</a>`;
   } catch (e) {
     alert("Smoothing failed.");
   } finally {

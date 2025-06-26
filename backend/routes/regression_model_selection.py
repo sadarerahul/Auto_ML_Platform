@@ -62,9 +62,9 @@ async def train_models(
         )
 
     try:
-        results_df = train_and_evaluate(selected_models)
+        results_df = train_and_evaluate(selected_models, dataset_name=active)
         table_html = results_df.to_html(classes="table table-dark table-sm", index=False)
-        message = "✅ Training finished. Models saved in backend/storage/models/"
+        message = "✅ Training finished. Models saved in static/models/ with dataset-linked names."
     except Exception as e:
         table_html, message = None, f"❌ Error during training: {e}"
 

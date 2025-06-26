@@ -26,7 +26,7 @@ smoothing_runs: list[dict] = []
 def get_active_csv_path() -> Path:
     name = get_active_dataset()
     if not name:
-        raise HTTPException(404, "⚠ No active dataset selected.")
+        raise HTTPException(404, "⚠️ No active dataset selected.")
     path = UPLOAD_DIR / name
     if not path.exists():
         raise HTTPException(404, f"Dataset '{name}' not found.")
@@ -103,7 +103,7 @@ def apply_smoothing(
     # Save result with safe name
     new_col = f"{column}_{method}"
     df[new_col] = smoothed
-    out_name = f"{safe_name(path.stem)}{safe_name(column)}{safe_name(method)}.csv"
+    out_name = f"{safe_name(path.stem)}_{safe_name(column)}_{safe_name(method)}.csv"
     out_fp = PROCESSED_DIR / out_name
     df.to_csv(out_fp, index=False)
 

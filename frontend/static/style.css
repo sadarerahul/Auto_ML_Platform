@@ -2,7 +2,7 @@
    style.css - Enhanced RPDS Platform (Dark Theme)
    --------------------------------------------------- */
 
-/* Global Reset and Font */
+/* 🌐 Global Reset and Typography */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #121212;
@@ -11,7 +11,11 @@ body {
   margin: 0;
 }
 
+<<<<<<< HEAD
 /* Typography & Links */
+=======
+/* 🔗 Navbar & Links */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .navbar-brand,
 .nav-link {
   font-weight: 600;
@@ -23,7 +27,7 @@ body {
   color: #d1d1d1 !important;
 }
 
-/* Hero Section */
+/* 🧭 Hero Section */
 .hero {
   background: url('https://images.unsplash.com/photo-1665686302311-fc5b8574258b?auto=format&fit=crop&w=1600&q=80') center center / cover no-repeat;
   height: 90vh;
@@ -45,7 +49,7 @@ body {
   color: #e0e0e0;
 }
 
-/* Animation */
+/* ✨ Animation */
 .fade-in {
   animation: fadeIn 1.5s ease-in-out;
 }
@@ -55,7 +59,7 @@ body {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Cards */
+/* 📦 Cards */
 .card {
   transition: transform 0.2s ease, box-shadow 0.3s ease;
   background-color: #1f1f1f;
@@ -66,7 +70,11 @@ body {
   box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
 }
 
+<<<<<<< HEAD
 /* Tables */
+=======
+/* 📊 Tables */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .table-bordered th,
 .table-bordered td {
   border-color: #3a3a3a;
@@ -78,7 +86,11 @@ body {
   color: #0dcaf0;
 }
 
+<<<<<<< HEAD
 /* Forms */
+=======
+/* 📝 Forms */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .form-control,
 .form-select {
   background-color: #1e1e1e;
@@ -90,6 +102,7 @@ body {
 .form-select:focus {
   border-color: #0dcaf0;
   box-shadow: 0 0 5px rgba(13, 202, 240, 0.5);
+<<<<<<< HEAD
 }
 
 /* Alerts */
@@ -120,9 +133,46 @@ body {
   color: #198754;
   background-color: #19875414;
   border-color: #19875488;
+=======
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 }
 
-/* Buttons */
+.form-check-label {
+  padding-left: 4px;
+  font-size: 0.95rem;
+}
+
+/* ⚠️ Alerts */
+.alert {
+  background-color: #2a2a2a;
+  border: 1px solid transparent;
+}
+
+.alert-info {
+  color: #0dcaf0;
+  background-color: #0dcaf014;
+  border-color: #0dcaf088;
+}
+
+.alert-warning {
+  color: #ffc107;
+  background-color: #ffc10714;
+  border-color: #ffc10788;
+}
+
+.alert-danger {
+  color: #dc3545;
+  background-color: #dc354514;
+  border-color: #dc354588;
+}
+
+.alert-success {
+  color: #198754;
+  background-color: #19875414;
+  border-color: #19875488;
+}
+
+/* 🔘 Buttons */
 .btn-outline-info:hover {
   background-color: #0dcaf0;
   color: #000;
@@ -138,7 +188,11 @@ body {
   color: #000;
 }
 
+<<<<<<< HEAD
 /* Sidebar Navigation */
+=======
+/* 📚 Sidebar Navigation */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .list-group-item-action {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
@@ -155,7 +209,37 @@ body {
   font-weight: 600;
 }
 
+<<<<<<< HEAD
 /* Progress Bar */
+=======
+/* 📈 Plotly Charts Wrapper */
+.plot-container {
+  background-color: #101010;
+  border: 1px solid #2c2c2c;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.05);
+  margin-bottom: 2rem;
+}
+
+/* 📌 Sticky Sidebar (Optional) */
+.sidebar-sticky {
+  position: sticky;
+  top: 1rem;
+}
+
+/* 🏁 Section Title Headers */
+.section-title {
+  font-size: 1.25rem;
+  color: #0dcaf0;
+  font-weight: 600;
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.3rem;
+  margin-bottom: 1rem;
+}
+
+/* 📊 Progress Bar */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .progress {
   background-color: #2e2e2e;
 }
@@ -165,7 +249,11 @@ body {
   font-weight: 500;
 }
 
+<<<<<<< HEAD
 /* Footer */
+=======
+/* 🦶 Footer */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 footer {
   background-color: #1e1e1e;
   color: #ccc;
@@ -186,7 +274,11 @@ footer a:hover {
   margin: 4px 0;
 }
 
+<<<<<<< HEAD
 /* Utilities */
+=======
+/* 🎨 Utilities */
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
 .text-info {
   color: #0dcaf0 !important;
 }
@@ -205,4 +297,22 @@ footer a:hover {
 
 .border-warning {
   border-color: #ffc107 !important;
+<<<<<<< HEAD
 }
+=======
+}
+
+/* 🖱️ Scrollbar Styling (Chrome/Edge Only) */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+>>>>>>> cd27b153e713b10f3590ebd29f7419bf242609dd
