@@ -15,7 +15,7 @@ from backend.utils.regression.eda_utils import (
     describe_data,
     generate_univariate_plots,
     generate_multivariate_plots,
-    filter_dataset_by_target,
+    visualize_target_distribution,
 )
 
 router = APIRouter()
@@ -95,6 +95,7 @@ async def describe_eda(request: Request):
 # ─────────────────────────────────────────────
 # POST: Apply Target-Based Filtering
 # ─────────────────────────────────────────────
+
 @router.post("/regression/eda/filter", response_class=HTMLResponse)
 async def apply_target_filter(
     request: Request,
@@ -117,47 +118,28 @@ async def apply_target_filter(
         lower = float(lower_percentile)
         upper = float(upper_percentile)
 
-        if not (0 <= lower <= 100 and 0 <= upper <= 100):
-            raise ValueError("Percentiles must be between 0 and 100.")
-
         df = pd.read_csv(full_path)
-        filtered_df, shape_str, filename = filter_dataset_by_target(
-            df, target_column, lower, upper
-        )
-
-        # ❌ Do NOT update active dataset (keep pointing to raw/original file)
-        # set_active_dataset(filename)  ← removed
-
-        # ✅ Use cleaned file for all EDA outputs
-        overview = dataset_overview(filtered_df)
-        desc_stats, missing_info = describe_data(filtered_df)
-        univariate_plots = generate_univariate_plots(filtered_df, filename)
-        multivariate_plots = generate_multivariate_plots(filtered_df, filename)
+        plot_path = visualize_target_distribution(df, target_column, lower, upper)
 
         return templates.TemplateResponse("regression/eda_dashboard.html", {
             "request": request,
-            "overview": overview,
-            "describe": {
-                "summary": desc_stats.to_html(classes='table table-striped', border=0),
-                "missing": missing_info.to_html(classes='table table-bordered', border=0),
-            },
-            "univariate": univariate_plots,
-            "multivariate": multivariate_plots,
-            "columns": filtered_df.columns.tolist(),
-            "filter_shape": shape_str,
-            "filtered_file": filename,
+            "overview": dataset_overview(df),
+            "describe": None,
+            "univariate": None,
+            "multivariate": None,
+            "columns": df.columns.tolist(),
+            "filter_shape": None,
+            "filtered_file": None,
+            "target_dist_plot": plot_path,
             "page": "eda",
             **get_sidebar_context(active_file=active_file, step=2),
         })
 
     except Exception as e:
-        fallback_cols = pd.read_csv(full_path).columns.tolist()
         return templates.TemplateResponse("regression/eda_dashboard.html", {
             "request": request,
             "error": f"❌ Filtering error: {str(e)}",
-            "columns": fallback_cols,
-            "filter_shape": None,
-            "filtered_file": None,
+            "columns": pd.read_csv(full_path).columns.tolist(),
             "page": "eda",
             **get_sidebar_context(active_file=active_file, step=2),
         })

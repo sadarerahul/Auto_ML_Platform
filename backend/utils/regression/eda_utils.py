@@ -9,6 +9,10 @@ from backend.utils.regression.session_state import set_active_dataset, get_activ
 
 pio.templates.default = "plotly_white"
 
+PLOTS_DIR = os.path.abspath("frontend/static/plots")
+os.makedirs(PLOTS_DIR, exist_ok=True)
+
+
 # ────────────────────────────────────────────────────────────────
 # 📁  Directory setup
 # ────────────────────────────────────────────────────────────────
@@ -103,12 +107,41 @@ def generate_multivariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str
 # ────────────────────────────────────────────────────────────────
 # 🎯  Percentile filtering helper
 # ────────────────────────────────────────────────────────────────
-def filter_dataset_by_target(
+# def filter_dataset_by_target(
+#     df: pd.DataFrame,
+#     target_col: str,
+#     lower_percentile: float,
+#     upper_percentile: float,
+# ):
+#     if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
+#         raise ValueError("Percentiles must be between 0 and 100.")
+#     if target_col not in df.columns:
+#         raise KeyError(f"Target column '{target_col}' not found.")
+
+#     lower = df[target_col].quantile(lower_percentile / 100)
+#     upper = df[target_col].quantile(upper_percentile / 100)
+#     filtered_df = df[df[target_col].between(lower, upper)].copy()
+
+#     # ✅ Always save to "<base>_cleaned.csv"
+#     current_active = Path(get_active_dataset()).stem
+#     base_name = current_active.replace("_cleaned", "")
+#     file_name = f"{base_name}_cleaned.csv"
+#     cleaned_path = os.path.join(CLEANED_DIR, file_name)
+
+#     filtered_df.to_csv(cleaned_path, index=False)
+
+#     # ❌ Don't set this cleaned file as active
+#     # set_active_dataset(file_name) ← REMOVE THIS LINE
+
+#     shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
+#     return filtered_df, shape_str, file_name
+
+def visualize_target_distribution(
     df: pd.DataFrame,
     target_col: str,
     lower_percentile: float,
     upper_percentile: float,
-):
+) -> str:
     if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
         raise ValueError("Percentiles must be between 0 and 100.")
     if target_col not in df.columns:
@@ -116,19 +149,28 @@ def filter_dataset_by_target(
 
     lower = df[target_col].quantile(lower_percentile / 100)
     upper = df[target_col].quantile(upper_percentile / 100)
-    filtered_df = df[df[target_col].between(lower, upper)].copy()
 
-    # ✅ Always save to "<base>_cleaned.csv"
-    current_active = Path(get_active_dataset()).stem
-    base_name = current_active.replace("_cleaned", "")
-    file_name = f"{base_name}_cleaned.csv"
-    cleaned_path = os.path.join(CLEANED_DIR, file_name)
+    def classify(val):
+        if val < lower:
+            return f"< {lower_percentile}th percentile"
+        elif val > upper:
+            return f"> {upper_percentile}th percentile"
+        else:
+            return f"{lower_percentile}–{upper_percentile}% Range"
 
-    filtered_df.to_csv(cleaned_path, index=False)
+    df_plot = df[[target_col]].copy()
+    df_plot["Range"] = df_plot[target_col].apply(classify)
 
-    # ❌ Don't set this cleaned file as active
-    # set_active_dataset(file_name) ← REMOVE THIS LINE
+    fig = px.histogram(
+        df_plot,
+        x=target_col,
+        color="Range",
+        nbins=30,
+        title=f"Target Distribution by Percentile: {target_col}",
+        marginal="box"
+    )
 
-    shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
-    return filtered_df, shape_str, file_name
-
+    filename = f"{safe_filename(target_col)}_{lower_percentile}_{upper_percentile}_dist.html"
+    filepath = os.path.join(PLOTS_DIR, filename)
+    fig.write_html(filepath)
+    return filepath.replace("frontend", "")  # relative path for iframe

@@ -1,44 +1,33 @@
 import os
 import pandas as pd
-from backend.utils.regression.session_state import get_active_dataset, set_active_dataset
+from backend.utils.regression.session_state import (
+    get_active_dataset,
+    set_processing_dataset,
+    get_processing_dataset_path,
+)
 
 # 📁 Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "../../../frontend/static/uploads")
-CLEANED_DATA_DIR = os.path.join(BASE_DIR, "../../../frontend/static/cleaned")
-os.makedirs(CLEANED_DATA_DIR, exist_ok=True)
-
-# 🔧 Resolve paths to raw and cleaned versions
-def _get_data_paths():
-    filename = get_active_dataset()
-    if not filename:
-        return None, None
-    original_path = os.path.join(UPLOAD_DIR, filename)
-    cleaned_name = filename.replace(".csv", "_cleaned.csv")
-    cleaned_path = os.path.join(CLEANED_DATA_DIR, cleaned_name)
-    return original_path, cleaned_path
+CLEANED_DIR = os.path.join(BASE_DIR, "../../../frontend/static/cleaned")
+os.makedirs(CLEANED_DIR, exist_ok=True)
 
 # 🔄 Load the dataset (prefers cleaned version if available)
 def load_data():
-    original_path, cleaned_path = _get_data_paths()
-    if not original_path:
-        return pd.DataFrame()
-
-    if os.path.exists(cleaned_path):
-        return pd.read_csv(cleaned_path)
-
-    if os.path.exists(original_path):
-        return pd.read_csv(original_path)
-
+    path = get_processing_dataset_path()
+    if os.path.exists(path):
+        return pd.read_csv(path)
     return pd.DataFrame()
 
-# 💾 Save cleaned data securely & activate it
+# 💾 Save cleaned data securely
 def save_data(df: pd.DataFrame):
-    _, cleaned_path = _get_data_paths()
-    if cleaned_path:
-        df.head(500).to_csv(cleaned_path, index=False)
-        cleaned_name = os.path.basename(cleaned_path)
-        set_active_dataset(cleaned_name)  # ✅ Make cleaned file active
+    original_filename = get_active_dataset()
+    if not original_filename:
+        return
+    cleaned_name = original_filename.replace(".csv", "_cleaned.csv")
+    cleaned_path = os.path.join(CLEANED_DIR, cleaned_name)
+    df.head(500).to_csv(cleaned_path, index=False)
+    set_processing_dataset(cleaned_name)  # ✅ Backend now uses cleaned version
 
 # ❓ Get columns with missing values
 def get_missing_columns():
@@ -48,7 +37,7 @@ def get_missing_columns():
 # 🔤 Detect categorical columns
 def get_categorical_columns():
     df = load_data()
-    return df.select_dtypes(include="object").columns.tolist()
+    return df.select_dtypes(include=["object", "category"]).columns.tolist()
 
 # 🩹 Apply missing value strategy
 def apply_missing_value_strategy(column, strategy, custom_value=None):
