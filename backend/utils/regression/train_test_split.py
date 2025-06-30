@@ -1,18 +1,36 @@
-import pandas as pd
+import os
 from pathlib import Path
+import pandas as pd
 from sklearn.model_selection import train_test_split
+
 from .cleaning import load_data
 from .selection_state import load_xy
 from backend.utils.regression.session_state import get_active_dataset
-import os
 
 # 📁 Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 SPLIT_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/splits"))
 os.makedirs(SPLIT_DIR, exist_ok=True)
 
-def perform_split(test_size: float, random_state: int, preview_rows: int = 5):
-    """Perform a train-test split and save dataset-prefixed splits for cleanup support."""
+
+def perform_split(test_size: float, random_state: int, preview_rows: int = 5) -> dict:
+    """
+    Perform a train-test split and save split CSVs for the current dataset.
+
+    Parameters
+    ----------
+    test_size : float
+        Proportion of the dataset to include in the test split.
+    random_state : int
+        Seed for reproducibility.
+    preview_rows : int
+        Number of preview rows to return from each split.
+
+    Returns
+    -------
+    dict
+        Dictionary with split previews and their shapes.
+    """
     xy = load_xy()
     if not xy["X"] or not xy["y"]:
         raise ValueError("Please define X / y first in Feature‑Selection.")
@@ -28,7 +46,7 @@ def perform_split(test_size: float, random_state: int, preview_rows: int = 5):
         X, y, test_size=test_size, random_state=random_state
     )
 
-    # 💾 Save with dataset prefix for cleanup
+    # 💾 Save with dataset prefix
     dataset_name = get_active_dataset()
     base = Path(dataset_name).stem
 

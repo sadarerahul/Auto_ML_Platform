@@ -1,8 +1,7 @@
 {
   "X": [
-    "age",
-    "bmi",
-    "children"
+    "Air head pressure(pressure:bar)",
+    "Dumped broth flow(Fremoved:L/h)"
   ],
-  "y": "charges"
+  "y": "Penicillin concentration(P:g/L)"
 }

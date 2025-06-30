@@ -5,18 +5,22 @@ import plotly.express as px
 from scipy.stats import skew, kurtosis
 from backend.utils.regression.session_state import get_active_dataset
 
-# 📁 Dataset paths
+# Directories
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/uploads"))
 CLEANED_DATA_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend/static/cleaned"))
 os.makedirs(CLEANED_DATA_DIR, exist_ok=True)
 
 # ✅ Save dataframe safely
-def _safe_write(df, path):
-    df.to_csv(path, index=False)
+def _safe_write(df: pd.DataFrame, path: str):
+    """Writes a DataFrame to CSV (limited to 500 rows)."""
+    df.head(500).to_csv(path, index=False)
 
-# 🔍 Resolve cleaned path in backend-only storage
-def _get_cleaned_path():
+# 🔍 Resolve cleaned path
+from typing import Optional
+
+def _get_cleaned_path() -> Optional[str]:
+    """Resolves the path to the currently active cleaned dataset."""
     filename = get_active_dataset()
     if not filename:
         return None
@@ -27,12 +31,13 @@ def _get_cleaned_path():
 
     if not os.path.exists(cleaned_path) and os.path.exists(raw_path):
         df = pd.read_csv(raw_path)
-        _safe_write(df.head(500), cleaned_path)
+        _safe_write(df, cleaned_path)
 
     return cleaned_path if os.path.exists(cleaned_path) else None
 
 # 🔢 List numeric columns
-def get_numeric_columns_for_outliers():
+def get_numeric_columns_for_outliers() -> list:
+    """Returns a list of numeric columns from the active cleaned dataset."""
     path = _get_cleaned_path()
     if not path:
         return []
@@ -44,6 +49,12 @@ def get_numeric_columns_for_outliers():
 
 # 📊 Generate boxplot and suggest method
 def generate_outlier_plot(column: str):
+    """
+    Generates a boxplot and suggests the best method to treat outliers.
+
+    Returns:
+        (str: HTML of plot, str: suggested method)
+    """
     path = _get_cleaned_path()
     if not path:
         return None, None
@@ -56,6 +67,7 @@ def generate_outlier_plot(column: str):
         skew_val = skew(col_data)
         kurt_val = kurtosis(col_data, fisher=False)
 
+        # Suggest method based on skew and kurtosis
         if abs(skew_val) < 0.5 and kurt_val < 3.5:
             suggestion = "zscore"
         elif abs(skew_val) < 1.0:
@@ -77,6 +89,14 @@ def generate_outlier_plot(column: str):
 
 # 🧮 Apply outlier handling method
 def handle_outliers(column: str, method: str):
+    """
+    Applies the selected outlier handling method to the specified column.
+
+    Returns:
+        - HTML summary before
+        - HTML summary after
+        - Status message
+    """
     path = _get_cleaned_path()
     if not path:
         return None, None, "⚠️ No active dataset found."
@@ -96,22 +116,25 @@ def handle_outliers(column: str, method: str):
             lower = q1 - 1.5 * iqr
             upper = q3 + 1.5 * iqr
             df = df[(df[column] >= lower) & (df[column] <= upper)]
+
         elif method == "zscore":
             mean = df[column].mean()
             std = df[column].std()
             if std == 0:
                 return None, None, f"⚠️ Column '{column}' has zero variance — cannot apply z-score."
             df = df[np.abs((df[column] - mean) / std) <= 3]
+
         elif method == "capping":
             lower_cap = df[column].quantile(0.05)
             upper_cap = df[column].quantile(0.95)
             df[column] = np.where(df[column] < lower_cap, lower_cap, df[column])
             df[column] = np.where(df[column] > upper_cap, upper_cap, df[column])
+
         else:
             return None, None, f"❌ Unknown outlier method: {method}"
 
         summary_after = df[column].describe().to_frame(name="After")
-        _safe_write(df.head(500), path)
+        _safe_write(df, path)
 
         rows_after = len(df)
         delta = rows_before - rows_after

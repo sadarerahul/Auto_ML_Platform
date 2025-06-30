@@ -20,14 +20,15 @@ def load_data():
     return pd.DataFrame()
 
 # 💾 Save cleaned data securely
+# 💾 Save cleaned data securely
 def save_data(df: pd.DataFrame):
     original_filename = get_active_dataset()
     if not original_filename:
         return
     cleaned_name = original_filename.replace(".csv", "_cleaned.csv")
     cleaned_path = os.path.join(CLEANED_DIR, cleaned_name)
-    df.head(500).to_csv(cleaned_path, index=False)
-    set_processing_dataset(cleaned_name)  # ✅ Backend now uses cleaned version
+    df.to_csv(cleaned_path, index=False)  # Save entire cleaned dataset
+    set_processing_dataset(cleaned_name)  # ✅ Marks cleaned version for processing
 
 # ❓ Get columns with missing values
 def get_missing_columns():

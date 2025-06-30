@@ -4,8 +4,9 @@ import plotly.express as px
 from plotly.io import to_html
 from .cleaning import load_data as _load_data
 
+
 def get_numeric_columns() -> list:
-    """Return numeric columns from the freshest dataset."""
+    """Return numeric columns from the cleaned dataset currently being processed."""
     try:
         df = _load_data()
         return df.select_dtypes(include="number").columns.tolist()
@@ -14,7 +15,7 @@ def get_numeric_columns() -> list:
 
 
 def load_cleaned_data() -> pd.DataFrame:
-    """Return the freshest dataset (cleaned if available)."""
+    """Return the cleaned dataset currently being processed."""
     return _load_data()
 
 
@@ -24,8 +25,10 @@ def make_scatter(df, column: str, limit: int = 100, dark=False) -> str:
     if column not in df.columns:
         return f"<p class='text-danger'>Column '{column}' not found in dataset.</p>"
 
+    data = df if limit is None else df.head(limit)
+
     fig = px.scatter(
-        df.head(limit),
+        data,
         y=column,
         title=f"Scatter: Index vs {column}",
         template="plotly_dark" if dark else "plotly_white"
@@ -53,8 +56,10 @@ def make_two_column_scatter(df, x_col: str, y_col: str, limit: int = 100, dark=F
     if x_col not in df.columns or y_col not in df.columns:
         return f"<p class='text-danger'>One or both columns not found: {x_col}, {y_col}</p>"
 
+    data = df if limit is None else df.head(limit)
+
     fig = px.scatter(
-        df.head(limit),
+        data,
         x=x_col,
         y=y_col,
         title=f"{x_col} vs {y_col}",
@@ -114,7 +119,10 @@ def make_two_column_boxplot(df, x_col: str, y_col: str, dark=False) -> str:
 # ---------- Main Generator ----------
 
 def generate_visualizations(selected_columns: list, plot_types: list, scatter_limit: int = 100, dark=True) -> list:
-    """Generate Plotly HTML charts based on selected columns and plot types."""
+    """
+    Generate Plotly HTML charts based on selected columns and plot types.
+    Supported plot_types: 'scatter', 'histogram', 'boxplot'
+    """
     try:
         df = load_cleaned_data()
         if df.empty:

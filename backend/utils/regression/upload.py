@@ -5,6 +5,15 @@ from fastapi import UploadFile
 from fastapi.templating import Jinja2Templates
 import logging
 
+# Import centralized dataset state functions
+from  backend.utils.regression.session_state import (
+    set_active_dataset,
+    get_active_dataset,
+    get_active_dataset_path,
+    is_dataset_active,
+    set_processing_dataset
+)
+
 # 📁 Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, "../../../frontend"))
@@ -18,7 +27,6 @@ SPLIT_DIR = os.path.join(FRONTEND_DIR, "static", "splits")
 PLOTS_DIR = os.path.join(FRONTEND_DIR, "static", "plots")
 
 TEMPLATE_DIR = os.path.join(FRONTEND_DIR, "templates")
-ACTIVE_DATASET_PATH = os.path.join(UPLOAD_DIR, "active_dataset.txt")
 
 # ✅ Ensure all required folders exist
 for folder in [
@@ -31,33 +39,6 @@ for folder in [
 templates = Jinja2Templates(directory=TEMPLATE_DIR)
 MAX_ROWS = 500
 logging.basicConfig(level=logging.INFO)
-
-# ───────────────────────────────────────────────
-# ✅ Active Dataset State
-# ───────────────────────────────────────────────
-def set_active_dataset(filename: str):
-    name_only = os.path.basename(filename)
-    with open(ACTIVE_DATASET_PATH, "w", encoding="utf-8") as f:
-        f.write(name_only.strip())
-    logging.info(f"✅ Active dataset set to: {name_only}")
-
-def get_active_dataset() -> str:
-    if os.path.exists(ACTIVE_DATASET_PATH):
-        with open(ACTIVE_DATASET_PATH, "r", encoding="utf-8") as f:
-            dataset_name = f.read().strip()
-            dataset_path = os.path.join(UPLOAD_DIR, dataset_name)
-            if os.path.exists(dataset_path):
-                return dataset_name
-            else:
-                os.remove(ACTIVE_DATASET_PATH)
-    return ""
-
-def get_active_dataset_path():
-    filename = get_active_dataset()
-    return os.path.join(UPLOAD_DIR, filename) if filename else None
-
-def is_dataset_active(filename):
-    return os.path.basename(filename) == get_active_dataset()
 
 # ───────────────────────────────────────────────
 # ✅ Upload File + Save
@@ -87,8 +68,12 @@ async def save_uploaded_file(file: UploadFile, file_type="csv"):
         filename = _get_available_name(file.filename)
         original_path = os.path.join(UPLOAD_DIR, filename)
         df.to_csv(original_path, index=False, encoding="utf-8")
-        set_active_dataset(filename)
 
+        # Set active and processing dataset
+        set_active_dataset(filename)
+        set_processing_dataset(filename)
+
+        logging.info(f"✅ Uploaded and set as active: {filename}")
         return df, f"✅ Uploaded as {filename}"
     except Exception as e:
         return None, f"❌ Upload failed: {str(e)}"

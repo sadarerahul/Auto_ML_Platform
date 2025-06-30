@@ -1,94 +1,176 @@
-# backend/utils/regression/eda_utils.py
+import os
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 import numpy as np
 import plotly.express as px
 import plotly.io as pio
-import os
-from fastapi import APIRouter, Request, Form
+from pathlib import Path
+import re
+from backend.utils.regression.session_state import set_active_dataset, get_active_dataset
 
 pio.templates.default = "plotly_white"
 
-PLOT_PATH = "frontend/static/plots"
-os.makedirs(PLOT_PATH, exist_ok=True)
+PLOTS_DIR = os.path.abspath("frontend/static/plots")
+os.makedirs(PLOTS_DIR, exist_ok=True)
 
+
+# ────────────────────────────────────────────────────────────────
+# 📁  Directory setup
+# ────────────────────────────────────────────────────────────────
+PLOT_PATH   = "frontend/static/plots"
+UPLOAD_DIR  = "frontend/static/uploads"
+CLEANED_DIR = "frontend/static/cleaned"
+for d in (PLOT_PATH, UPLOAD_DIR, CLEANED_DIR):
+    os.makedirs(d, exist_ok=True)
+
+# ────────────────────────────────────────────────────────────────
+# 🫼  Helpers
+# ────────────────────────────────────────────────────────────────
+def safe_filename(text: str) -> str:
+    """Replace characters that are illegal on Windows or POSIX filesystems."""
+    return re.sub(r'[<>:"/\\|?*]', "_", text)
+
+# ────────────────────────────────────────────────────────────────
+# 📊  Dataset-level helpers
+# ────────────────────────────────────────────────────────────────
 def dataset_overview(df: pd.DataFrame) -> dict:
     return {
         "shape": df.shape,
-        "columns": df.dtypes.reset_index().rename(columns={"index": "Column", 0: "Dtype"}).to_dict(orient="records"),
+        "columns": df.dtypes.reset_index()
+                     .rename(columns={"index": "Column", 0: "Dtype"})
+                     .to_dict(orient="records"),
         "n_rows": df.shape[0],
         "n_cols": df.shape[1],
     }
 
 def describe_data(df: pd.DataFrame):
-    summary = df.describe().T
+    summary          = df.describe().T
     summary["median"] = df.median(numeric_only=True)
-    summary["mode"] = df.mode(numeric_only=True).iloc[0]
+    try:
+        summary["mode"] = df.mode(numeric_only=True).iloc[0]
+    except IndexError:
+        summary["mode"] = np.nan
+
     missing = pd.DataFrame({
-        "missing_count": df.isnull().sum(),
-        "missing_percent": df.isnull().mean() * 100
+        "missing_count"   : df.isna().sum(),
+        "missing_percent" : df.isna().mean().mul(100)
     })
     return summary.round(2), missing.round(2)
 
-def generate_univariate_plots(df: pd.DataFrame):
+# ────────────────────────────────────────────────────────────────
+# 📉  Univariate plots
+# ────────────────────────────────────────────────────────────────
+def generate_univariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str]:
     plots = []
+    base  = Path(dataset_name).stem
+
     for col in df.columns:
         if pd.api.types.is_numeric_dtype(df[col]):
-            fig = px.histogram(df, x=col, marginal="box", nbins=30, title=f"Distribution of {col}")
-        elif pd.api.types.is_categorical_dtype(df[col]) or df[col].dtype == object:
-            value_counts = df[col].value_counts().reset_index()
-            value_counts.columns = [col, "count"]
-            fig = px.bar(value_counts, x=col, y="count", title=f"Count plot of {col}", labels={col: col, "count": "Count"})
+            fig = px.histogram(df, x=col, marginal="box", nbins=30,
+                               title=f"Distribution of {col}")
+        elif pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_categorical_dtype(df[col]):
+            vc  = df[col].value_counts().reset_index()
+            vc.columns = [col, "count"]
+            fig = px.bar(vc, x=col, y="count", title=f"Count plot of {col}")
         else:
             continue
 
-        plot_path = os.path.join(PLOT_PATH, f"univariate_{col}.html")
-        fig.write_html(plot_path)
-        plots.append(plot_path.replace("frontend", ""))
+        safe_col  = safe_filename(col)
+        file_name = f"{base}_univariate_{safe_col}.html"
+        file_path = os.path.join(PLOT_PATH, file_name)
+        fig.write_html(file_path)
+        plots.append(file_path.replace("frontend", ""))
     return plots
 
-def generate_multivariate_plots(df: pd.DataFrame):
-    plots = []
+# ────────────────────────────────────────────────────────────────
+# 🔗  Multivariate plots
+# ────────────────────────────────────────────────────────────────
+def generate_multivariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str]:
+    plots    = []
+    base     = Path(dataset_name).stem
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
     if len(num_cols) >= 2:
         corr = df[num_cols].corr()
-        fig = px.imshow(corr, text_auto=True, title="Correlation Heatmap")
-        path = os.path.join(PLOT_PATH, "correlation.html")
+        fig  = px.imshow(corr, text_auto=True, title="Correlation Heatmap")
+        path = os.path.join(PLOT_PATH, f"{base}_correlation.html")
         fig.write_html(path)
         plots.append(path.replace("frontend", ""))
 
-    if len(num_cols) <= 6:
-        sns.pairplot(df[num_cols])
-        path = os.path.join(PLOT_PATH, "pairplot.png")
-        plt.savefig(path)
-        plt.clf()
+    if 2 <= len(num_cols) <= 6:
+        fig  = px.scatter_matrix(df, dimensions=num_cols, title="Pairplot Matrix")
+        path = os.path.join(PLOT_PATH, f"{base}_pairplot.html")
+        fig.write_html(path)
         plots.append(path.replace("frontend", ""))
 
     return plots
 
-# Add this at the bottom of backend/utils/regression/eda_utils.py
-
-import os
-import pandas as pd
-
-def filter_dataset_by_target(df, target_col, lower_percentile, upper_percentile):
-    # Convert to float and divide by 100 to get into range [0, 1]
-    lower_p = float(lower_percentile) / 100.0
-    upper_p = float(upper_percentile) / 100.0
-
-    if not (0 <= lower_p <= 1 and 0 <= upper_p <= 1):
+# ────────────────────────────────────────────────────────────────
+# 🎯  Percentile filtering helper
+# ────────────────────────────────────────────────────────────────
+def filter_dataset_by_target(
+    df: pd.DataFrame,
+    target_col: str,
+    lower_percentile: float,
+    upper_percentile: float,
+):
+    if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
         raise ValueError("Percentiles must be between 0 and 100.")
+    if target_col not in df.columns:
+        raise KeyError(f"Target column '{target_col}' not found.")
 
-    q1 = df[target_col].quantile(lower_p)
-    q3 = df[target_col].quantile(upper_p)
+    lower = df[target_col].quantile(lower_percentile / 100)
+    upper = df[target_col].quantile(upper_percentile / 100)
+    filtered_df = df[df[target_col].between(lower, upper)].copy()
 
-    filtered_df = df[(df[target_col] >= q1) & (df[target_col] <= q3)]
+    # ✅ Always save to "<base>_cleaned.csv"
+    current_active = Path(get_active_dataset()).stem
+    base_name = current_active.replace("_cleaned", "")
+    file_name = f"{base_name}_cleaned.csv"
+    cleaned_path = os.path.join(CLEANED_DIR, file_name)
+
+    filtered_df.to_csv(cleaned_path, index=False)
+
+    # ✅ Do NOT set cleaned file as active dataset anymore
+    # set_active_dataset(file_name) ← REMOVED
+
     shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
+    return filtered_df, shape_str, file_name
 
-    filename = f"filtered_{target_col}_{int(lower_percentile)}_{int(upper_percentile)}.csv"
-    filepath = os.path.join("frontend/static/uploads", filename)
-    filtered_df.to_csv(filepath, index=False)
+def visualize_target_distribution(
+    df: pd.DataFrame,
+    target_col: str,
+    lower_percentile: float,
+    upper_percentile: float,
+) -> str:
+    if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
+        raise ValueError("Percentiles must be between 0 and 100.")
+    if target_col not in df.columns:
+        raise KeyError(f"Target column '{target_col}' not found.")
 
-    return filtered_df, shape_str, filename
+    lower = df[target_col].quantile(lower_percentile / 100)
+    upper = df[target_col].quantile(upper_percentile / 100)
+
+    def classify(val):
+        if val < lower:
+            return f"< {lower_percentile}th percentile"
+        elif val > upper:
+            return f"> {upper_percentile}th percentile"
+        else:
+            return f"{lower_percentile}–{upper_percentile}% Range"
+
+    df_plot = df[[target_col]].copy()
+    df_plot["Range"] = df_plot[target_col].apply(classify)
+
+    fig = px.histogram(
+        df_plot,
+        x=target_col,
+        color="Range",
+        nbins=30,
+        title=f"Target Distribution by Percentile: {target_col}",
+        marginal="box"
+    )
+
+    filename = f"{safe_filename(target_col)}_{lower_percentile}_{upper_percentile}_dist.html"
+    filepath = os.path.join(PLOTS_DIR, filename)
+    fig.write_html(filepath)
+    return filepath.replace("frontend", "")  # relative path for iframe
