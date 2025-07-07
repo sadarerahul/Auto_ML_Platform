@@ -1,8 +1,12 @@
 {
   "X": [
-    "age",
-    "bmi",
-    "children"
+    "Time (h)",
+    "Air head pressure(pressure:bar)",
+    "Dumped broth flow(Fremoved:L/h)",
+    "Substrate concentration(S:g/L)",
+    "Dissolved oxygen concentration(DO2:mg/L)",
+    "Vessel Weight(Wt:Kg)",
+    "carbon dioxide percent in off-gas(CO2outgas:%)"
   ],
-  "y": "charges"
+  "y": "Penicillin concentration(P:g/L)"
 }

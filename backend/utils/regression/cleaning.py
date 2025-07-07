@@ -3,7 +3,9 @@ import pandas as pd
 from backend.utils.regression.session_state import (
     get_active_dataset,
     set_processing_dataset,
+    get_active_dataset_path,
     get_processing_dataset_path,
+    get_active_dataset,
 )
 
 # 📁 Paths
@@ -14,11 +16,12 @@ os.makedirs(CLEANED_DIR, exist_ok=True)
 
 # 🔄 Load the dataset (prefers cleaned version if available)
 def load_data():
-    path = get_processing_dataset_path()
+    path = get_active_dataset_path()
     if os.path.exists(path):
         return pd.read_csv(path)
     return pd.DataFrame()
 
+# 💾 Save cleaned data securely
 # 💾 Save cleaned data securely
 def save_data(df: pd.DataFrame):
     original_filename = get_active_dataset()
@@ -26,8 +29,8 @@ def save_data(df: pd.DataFrame):
         return
     cleaned_name = original_filename.replace(".csv", "_cleaned.csv")
     cleaned_path = os.path.join(CLEANED_DIR, cleaned_name)
-    df.head(500).to_csv(cleaned_path, index=False)
-    set_processing_dataset(cleaned_name)  # ✅ Backend now uses cleaned version
+    df.to_csv(cleaned_path, index=False)  # Save entire cleaned dataset
+    set_processing_dataset(cleaned_name)  # ✅ Marks cleaned version for processing
 
 # ❓ Get columns with missing values
 def get_missing_columns():

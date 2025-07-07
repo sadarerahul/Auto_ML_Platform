@@ -107,34 +107,34 @@ def generate_multivariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str
 # ────────────────────────────────────────────────────────────────
 # 🎯  Percentile filtering helper
 # ────────────────────────────────────────────────────────────────
-# def filter_dataset_by_target(
-#     df: pd.DataFrame,
-#     target_col: str,
-#     lower_percentile: float,
-#     upper_percentile: float,
-# ):
-#     if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
-#         raise ValueError("Percentiles must be between 0 and 100.")
-#     if target_col not in df.columns:
-#         raise KeyError(f"Target column '{target_col}' not found.")
+def filter_dataset_by_target(
+    df: pd.DataFrame,
+    target_col: str,
+    lower_percentile: float,
+    upper_percentile: float,
+):
+    if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
+        raise ValueError("Percentiles must be between 0 and 100.")
+    if target_col not in df.columns:
+        raise KeyError(f"Target column '{target_col}' not found.")
 
-#     lower = df[target_col].quantile(lower_percentile / 100)
-#     upper = df[target_col].quantile(upper_percentile / 100)
-#     filtered_df = df[df[target_col].between(lower, upper)].copy()
+    lower = df[target_col].quantile(lower_percentile / 100)
+    upper = df[target_col].quantile(upper_percentile / 100)
+    filtered_df = df[df[target_col].between(lower, upper)].copy()
 
-#     # ✅ Always save to "<base>_cleaned.csv"
-#     current_active = Path(get_active_dataset()).stem
-#     base_name = current_active.replace("_cleaned", "")
-#     file_name = f"{base_name}_cleaned.csv"
-#     cleaned_path = os.path.join(CLEANED_DIR, file_name)
+    # ✅ Always save to "<base>_cleaned.csv"
+    current_active = Path(get_active_dataset()).stem
+    base_name = current_active.replace("_cleaned", "")
+    file_name = f"{base_name}_cleaned.csv"
+    cleaned_path = os.path.join(CLEANED_DIR, file_name)
 
-#     filtered_df.to_csv(cleaned_path, index=False)
+    filtered_df.to_csv(cleaned_path, index=False)
 
-#     # ❌ Don't set this cleaned file as active
-#     # set_active_dataset(file_name) ← REMOVE THIS LINE
+    # ✅ Do NOT set cleaned file as active dataset anymore
+    # set_active_dataset(file_name) ← REMOVED
 
-#     shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
-#     return filtered_df, shape_str, file_name
+    shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
+    return filtered_df, shape_str, file_name
 
 def visualize_target_distribution(
     df: pd.DataFrame,
