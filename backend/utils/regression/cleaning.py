@@ -5,47 +5,45 @@ from backend.utils.regression.session_state import (
     set_processing_dataset,
     get_active_dataset_path,
     get_processing_dataset_path,
-    get_active_dataset,
 )
 
-# 📁 Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_DIR = os.path.join(BASE_DIR, "../../../frontend/static/uploads")
 CLEANED_DIR = os.path.join(BASE_DIR, "../../../frontend/static/cleaned")
 os.makedirs(CLEANED_DIR, exist_ok=True)
 
-# 🔄 Load the dataset (prefers cleaned version if available)
+# 🔄 Load latest version of dataset (cleaned > raw fallback)
 def load_data():
-    path = get_active_dataset_path()
+    path = get_processing_dataset_path()
+    print("[DEBUG] Loading data from:", path)
     if os.path.exists(path):
         return pd.read_csv(path)
     return pd.DataFrame()
 
 # 💾 Save cleaned data securely
-# 💾 Save cleaned data securely
 def save_data(df: pd.DataFrame):
     original_filename = get_active_dataset()
     if not original_filename:
+        print("[ERROR] No active dataset found.")
         return
     cleaned_name = original_filename.replace(".csv", "_cleaned.csv")
     cleaned_path = os.path.join(CLEANED_DIR, cleaned_name)
-    df.to_csv(cleaned_path, index=False)  # Save entire cleaned dataset
-    set_processing_dataset(cleaned_name)  # ✅ Marks cleaned version for processing
+    df.to_csv(cleaned_path, index=False)
+    set_processing_dataset(cleaned_name)
+    print(f"[DEBUG] Saved cleaned data to: {cleaned_path}")
+    print(f"[DEBUG] Set processing dataset: {cleaned_name}")
 
-# ❓ Get columns with missing values
+# 🧼 Missing value handling
 def get_missing_columns():
     df = load_data()
     return df.columns[df.isnull().any()].tolist()
 
-# 🔤 Detect categorical columns
 def get_categorical_columns():
     df = load_data()
     return df.select_dtypes(include=["object", "category"]).columns.tolist()
 
-# 🩹 Apply missing value strategy
 def apply_missing_value_strategy(column, strategy, custom_value=None):
     df = load_data()
-
     if column not in df.columns:
         return False, f"⚠️ Column '{column}' not found."
     if df[column].isnull().all():
@@ -79,10 +77,8 @@ def apply_missing_value_strategy(column, strategy, custom_value=None):
     except Exception as e:
         return False, f"❌ Error applying strategy: {e}"
 
-# 🧠 Apply encoding to categorical column
 def apply_encoding(column, encoding_type):
     df = load_data()
-
     if column not in df.columns:
         return False, f"⚠️ Column '{column}' not found."
 
@@ -107,7 +103,6 @@ def apply_encoding(column, encoding_type):
     except Exception as e:
         return False, f"❌ Error during encoding: {e}"
 
-# 🔍 Preview cleaned data (for display)
 def get_cleaned_data_preview(n=10):
     df = load_data()
     if df.empty:

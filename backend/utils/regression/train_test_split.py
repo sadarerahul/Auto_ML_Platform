@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split , KFold
 
 from .cleaning import load_data
 from .selection_state import load_xy
@@ -66,4 +66,44 @@ def perform_split(test_size: float, random_state: int, preview_rows: int = 5) ->
             "y_train": y_train.shape,
             "y_test": y_test.shape,
         }
+    }
+def perform_kfold_split(n_splits: int = 5, random_state: int = 42, preview_rows: int = 5) -> dict:
+    # Load selected features and target
+    xy = load_xy()
+    if not xy.get("X") or not xy.get("y"):
+        raise ValueError("❌ Please define X and y first in Feature Selection.")
+
+    # Load dataset
+    df = load_data()
+    X = df[xy["X"]]
+    y = df[xy["y"]]
+
+    # Initialize KFold splitter
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    previews = []
+
+    for fold, (train_idx, test_idx) in enumerate(kf.split(X), start=1):
+        x_train, x_test = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
+
+        # Append preview of each fold
+        previews.append({
+    "fold": fold,
+    "X_train": x_train.head(preview_rows),
+    "X_test": x_test.head(preview_rows),
+    "y_train": y_train.head(preview_rows).to_frame(name="y_train"),
+    "y_test": y_test.head(preview_rows).to_frame(name="y_test"),
+    "shapes": {
+        "X_train": x_train.shape,
+        "X_test": x_test.shape,
+        "y_train": y_train.shape,
+        "y_test": y_test.shape,
+    }
+})
+
+
+    return {
+        "n_splits": n_splits,
+        "preview_rows": preview_rows,
+        "kfold": previews
     }

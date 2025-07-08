@@ -87,18 +87,23 @@ def make_two_column_histograms(df, cols: list, dark=False) -> list:
     return plots
 
 
-def make_boxplot(df, column: str, dark=False) -> str:
+def make_lineplot(df, column: str, limit: int = 100, dark=False) -> str:
     if column not in df.columns:
         return f"<p class='text-danger'>Column '{column}' not found in dataset.</p>"
+    
+    data = df if limit is None else df.head(limit)
 
-    fig = px.box(
-        df,
+    fig = px.line(
+        data,
+        x=data.index,
         y=column,
-        title=f"Boxplot of {column}",
+        title=f"Line Plot: Index vs {column}",
+        labels={'x': 'Index', column: column},
         template="plotly_dark" if dark else "plotly_white"
     )
     fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
     return to_html(fig, full_html=False)
+
 
 
 def make_two_column_boxplot(df, x_col: str, y_col: str, dark=False) -> str:
@@ -136,8 +141,9 @@ def generate_visualizations(selected_columns: list, plot_types: list, scatter_li
                 plots.append(make_scatter(df, col, scatter_limit, dark))
             if "histogram" in plot_types:
                 plots.append(make_histogram(df, col, dark=dark))
-            if "boxplot" in plot_types:
-                plots.append(make_boxplot(df, col, dark=dark))
+            
+            if "lineplot" in plot_types:
+                plots.append(make_lineplot(df, col, scatter_limit, dark))
 
         elif len(selected_columns) == 2:
             col1, col2 = selected_columns

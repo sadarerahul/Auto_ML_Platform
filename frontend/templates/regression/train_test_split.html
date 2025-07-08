@@ -1,58 +1,83 @@
 {% extends "regression.html" %}
-
 {% block regression_content %}
-<h4 class="text-info mb-3">🔀 Train‑Test Split</h4>
+
+<h4 class="text-info mb-4">Train‑Test Splitting Options</h4>
 
 {% if not xy_state.y %}
   <div class="alert alert-warning">
-    Please define X and y first in the <strong>Feature Selection</strong> step.
+    Please define <strong>X</strong> and <strong>y</strong> first in the <b>Feature Selection</b> step.
   </div>
 {% else %}
-  <form method="post" class="row g-3 mb-4 align-items-end">
+  <form method="post" class="row g-4 align-items-end">
+
+    <!-- 🔀 Split Method -->
     <div class="col-md-5">
-      <label class="form-label">📐 Test Size</label>
-      <select class="form-select" name="test_size_predefined"
-              onchange="document.getElementById('manual_test_size').value = '';">
-        <option value="">— Select from options —</option>
-        <option value="0.1">0.1 (10%)</option>
-        <option value="0.2" selected>0.2 (20%)</option>
-        <option value="0.25">0.25 (25%)</option>
-        <option value="0.3">0.3 (30%)</option>
-        <option value="0.4">0.4 (40%)</option>
+      <label class="form-label">Split Method</label>
+      <select class="form-select" name="split_method" onchange="toggleSplitMethod(this.value)" required>
+        <option value="random" selected>Random Train-Test Split</option>
+        <option value="kfold">K-Fold Cross Validation</option>
       </select>
-      <small class="text-muted">or enter manually below</small>
-      <input type="number" id="manual_test_size" step="0.01" min="0.05" max="0.95"
-             name="test_size_manual" class="form-control mt-1" placeholder="e.g., 0.33">
     </div>
 
-    <div class="col-md-4">
-      <label class="form-label">🎲 Random State</label>
-      <input type="number" name="random_state" class="form-control" value="42" required>
+    <!-- 📐 Random Split Options -->
+    <div id="random-options" class="row gx-3">
+      <div class="col-md-5 mt-3">
+        <label class="form-label">Test Size</label>
+        <select class="form-select" name="test_size_predefined"
+                onchange="document.getElementById('manual_test_size').value = '';">
+          <option value="">— Choose from options —</option>
+          <option value="0.1">0.1 (10%)</option>
+          <option value="0.2" selected>0.2 (20%)</option>
+          <option value="0.3">0.3 (30%)</option>
+          <option value="0.4">0.4 (40%)</option>
+        </select>
+        <small class="text-muted">Or enter manually below</small>
+        <input type="number" id="manual_test_size" name="test_size_manual"
+               class="form-control mt-1" step="0.01" min="0.05" max="0.95"
+               placeholder="e.g., 0.33">
+      </div>
+
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Random State</label>
+        <input type="number" name="random_state" class="form-control" value="42" required>
+      </div>
     </div>
 
-    <div class="col-md-3 d-grid">
-      <button type="submit" class="btn btn-outline-success">🚀 Split</button>
+    <!-- 🔁 K-Fold Split Options -->
+    <div id="kfold-options" class="row gx-3" style="display: none;">
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Number of Folds (K)</label>
+        <input type="number" name="k_folds" class="form-control" min="2" max="20" value="5" required>
+      </div>
+
+      <div class="col-md-4 mt-3">
+        <label class="form-label">Random State</label>
+        <input type="number" name="random_state" class="form-control" value="42" required>
+      </div>
+    </div>
+
+    <!-- 🚀 Submit -->
+    <div class="col-md-3 mt-3 d-grid">
+      <button type="submit" class="btn btn-outline-success">Split Dataset</button>
     </div>
   </form>
 {% endif %}
 
+<!-- ℹ Message after split -->
 {% if message %}
-  <div class="alert alert-info">{{ message }}</div>
+  <div class="alert alert-info mt-4">{{ message }}</div>
 {% endif %}
 
-{% if preview %}
-  <hr class="border-secondary my-4">
-  <h5 class="text-light">🔎 Preview of Split Data</h5>
-
-  {% if preview.shapes %}
-    <p class="text-muted">
-      Shapes —
-      <code>X_train</code>: {{ preview.shapes.X_train }},
-      <code>X_test</code>: {{ preview.shapes.X_test }},
-      <code>y_train</code>: {{ preview.shapes.y_train }},
-      <code>y_test</code>: {{ preview.shapes.y_test }}
-    </p>
-  {% endif %}
+<!-- 🔎 Preview of Random Split -->
+{% if preview and preview.shapes %}
+  <hr class="border-secondary mt-5 mb-4">
+  <h5 class="text-light">Preview of Random Train-Test Split</h5>
+  <p class="text-muted mb-2">
+    Shapes — <code>X_train</code>: {{ preview.shapes.X_train }},
+    <code>X_test</code>: {{ preview.shapes.X_test }},
+    <code>y_train</code>: {{ preview.shapes.y_train }},
+    <code>y_test</code>: {{ preview.shapes.y_test }}
+  </p>
 
   <div class="row">
     {% for key, df in preview.items() if key != 'shapes' %}
@@ -65,4 +90,38 @@
     {% endfor %}
   </div>
 {% endif %}
+
+<!-- 🔎 Preview of K-Fold (if supported later) -->
+{% if preview and preview.kfold %}
+  <hr class="border-secondary mt-5 mb-4">
+  <h5 class="text-light">K-Fold Previews</h5>
+  {% for fold in preview.kfold %}
+    <div class="mb-4">
+      <h6 class="text-warning">Fold {{ fold.fold }}</h6>
+      <p class="text-muted">
+        Shapes — X_train: {{ fold.shapes.X_train }}, X_test: {{ fold.shapes.X_test }},
+        y_train: {{ fold.shapes.y_train }}, y_test: {{ fold.shapes.y_test }}
+      </p>
+      <div class="row">
+        {% for part in ['X_train', 'X_test', 'y_train', 'y_test'] %}
+          <div class="col-md-6 mb-3">
+            <h6 class="text-info">{{ part }}</h6>
+            <div class="table-responsive">
+              {{ fold[part].to_html(classes="table table-sm table-dark", index=False) | safe }}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<!-- 🔧 Script to toggle form views -->
+<script>
+function toggleSplitMethod(method) {
+  document.getElementById("random-options").style.display = method === "random" ? "flex" : "none";
+  document.getElementById("kfold-options").style.display = method === "kfold" ? "flex" : "none";
+}
+</script>
+
 {% endblock %}

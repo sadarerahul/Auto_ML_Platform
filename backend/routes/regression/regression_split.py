@@ -38,32 +38,42 @@ async def split_page(request: Request):
 @router.post("/regression/split", response_class=HTMLResponse)
 async def do_split(
     request: Request,
+    split_method: str = Form("random"),
     test_size_predefined: Optional[str] = Form(None),
     test_size_manual: Optional[str] = Form(None),
     random_state: int = Form(42),
+    k_folds: Optional[int] = Form(5),
 ):
-    # Safely parse test size
-    try:
-        if test_size_manual and test_size_manual.strip():
-            test_size = float(test_size_manual)
-        elif test_size_predefined and test_size_predefined.strip():
-            test_size = float(test_size_predefined)
-        else:
-            test_size = 0.2
-    except ValueError:
-        test_size = 0.2
-
     files = dataset_service.list_files()
     active = files[-1] if files else None
     xy_state = load_xy()
 
     try:
-        preview = tts.perform_split(
-            test_size=test_size,
-            random_state=random_state,
-            preview_rows=5
-        )
-        message = f"✅ Split complete — Test size: {test_size}"
+        if split_method == "random":
+            test_size = 0.2
+            if test_size_manual and test_size_manual.strip():
+                test_size = float(test_size_manual)
+            elif test_size_predefined and test_size_predefined.strip():
+                test_size = float(test_size_predefined)
+
+            preview = tts.perform_split(
+                test_size=test_size,
+                random_state=random_state,
+                preview_rows=5
+            )
+            message = f"✅ Random split complete — Test size: {test_size}"
+
+        elif split_method == "kfold":
+            preview = tts.perform_kfold_split(
+                n_splits=int(k_folds),
+                random_state=random_state,
+                preview_rows=5
+            )
+            message = f"✅ K-Fold split (k={k_folds}) complete."
+
+        else:
+            raise ValueError("Invalid split method selected.")
+
     except Exception as e:
         preview, message = None, f"❌ Error: {e}"
 
