@@ -18,6 +18,7 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 async def select_features_page(request: Request):
     active = get_active_dataset()
     files = dataset_service.list_files()
+    xy_state = load_xy()
 
     return templates.TemplateResponse(
         "regression/feature_selection.html",
@@ -25,7 +26,7 @@ async def select_features_page(request: Request):
             "request": request,
             "page": "select_features",
             "numeric_columns": fs.numeric_columns(),
-            "xy_state": load_xy(),
+            "xy_state": xy_state,
             "files": files,
             "active_file": active,
             "max_datasets": MAX_DATASETS,
@@ -33,7 +34,7 @@ async def select_features_page(request: Request):
         },
     )
 
-# ---------- POST 1: correlation / top‑K ----------
+# ---------- POST 1: correlation / top-K ----------
 @router.post("/regression/select_features", response_class=HTMLResponse)
 async def run_feature_selection(
     request: Request,
@@ -41,12 +42,13 @@ async def run_feature_selection(
     top_k: int = Form(10),
 ):
     files = dataset_service.list_files()
-    active = files[-1] if files else None
+    active = get_active_dataset()
+
     try:
         series = fs.correlation_with_target(target_col)
         plot_html = fs.correlation_bar_html(series, f"Correlation vs {target_col}")
         selected = fs.top_features(series, int(top_k))
-        message = f"✅ Top {top_k} features selected."
+        message = f"✅ Top {top_k} features pre-selected based on correlation."
     except Exception as e:
         plot_html, selected = None, []
         message = f"❌ Error: {e}"
@@ -81,7 +83,7 @@ async def save_xy_selection(
     message = f"✅ Saved X ({len(x_cols)} columns) and y ({y_col})."
 
     files = dataset_service.list_files()
-    active = files[-1] if files else None
+    active = get_active_dataset()
 
     return templates.TemplateResponse(
         "regression/feature_selection.html",

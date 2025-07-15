@@ -20,6 +20,7 @@ async def category_visualisation_get(request: Request):
     dataset_path = get_active_dataset_path()
     if not dataset_path or not os.path.exists(dataset_path):
         return templates.TemplateResponse("regression/categories_visualisation.html", {
+            "page": "categories",
             "request": request, "error": "No dataset found."
         })
 
@@ -32,7 +33,8 @@ async def category_visualisation_get(request: Request):
         "request": request,
         "columns": all_columns,
         "numeric_columns": numeric_cols,
-        **get_sidebar_context(active_file=active_file, step=2),
+        "page": "categories",
+        **get_sidebar_context(active_file=active_file, step=3),
     })
 
 @router.post("/regression/categories", response_class=HTMLResponse)
@@ -59,14 +61,16 @@ async def category_visualisation_post(
             "columns": df.columns.tolist(),
             "numeric_columns": df.select_dtypes(include='number').columns.tolist(),
             "plots": plots,
+            "page": "categories",
             "success": f"{len(plots)} plot(s) generated successfully.",
-            **get_sidebar_context(active_file=active_file, step=2),
+            **get_sidebar_context(active_file=active_file, step=3),
         })
     except Exception as e:
         return templates.TemplateResponse("regression/categories_visualisation.html", {
             "request": request,
             "error": str(e),
+            "page": "categories",
             "columns": df.columns.tolist(),
             "numeric_columns": df.select_dtypes(include='number').columns.tolist(),
-            **get_sidebar_context(active_file=active_file, step=2),
+            **get_sidebar_context(active_file=active_file, step=3),
         })
