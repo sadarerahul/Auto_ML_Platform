@@ -52,12 +52,12 @@
       <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {% if page in ['clean','visualize','outliers','scale','select_features','pca','smooth','split'] %}active{% endif %}"
               data-bs-toggle="collapse"
               data-bs-target="#preprocessCollapse"
-              aria-expanded="{% if page in ['clean','visualize','outliers','scale','select_features','pca','smooth','split'] %}true{% else %}false{% endif %}">
+              aria-expanded="{% if page in ['clean','visualize','outliers','categories','scale','select_features','pca','smooth','split'] %}true{% else %}false{% endif %}">
         <span><i class="fas fa-cogs me-2"></i> 3️⃣ Preprocessing</span>
         <i class="fas fa-chevron-down small"></i>
       </button>
 
-      <div id="preprocessCollapse" class="collapse {% if page in ['clean','visualize','outliers','scale','select_features','pca','smooth','split'] %}show{% endif %}">
+      <div id="preprocessCollapse" class="collapse {% if page in ['clean','visualize','categories','outliers','scale','select_features','pca','smooth','split'] %}show{% endif %}">
         <a href="/regression/clean" class="list-group-item list-group-item-action ps-5 {% if page == 'clean' %}active{% endif %}">
           🧹 Clean & Encode
         </a>
@@ -139,10 +139,10 @@
         </p>
 
         <!-- 📊 Step Progress Bar -->
-        {% set preprocessing_pages = ['clean', 'visualize', 'outliers', 'scale', 'split', 'select_features', 'smooth'] %}
+        {% set preprocessing_pages = ['clean', 'visualize','categories', 'outliers', 'scale', 'split', 'select_features', 'smooth'] %}
         {% set total_steps = 6 %}
         {% set step_names = {
-          "upload": 1, "eda": 2, "clean": 3, "visualize": 3, "outliers": 3, "scale": 3, "split": 3, "select_features": 3, "smooth": 3,
+          "upload": 1, "eda": 2, "clean": 3, "visualize": 3, "outliers": 3,'categories':3, "scale": 3, "split": 3, "select_features": 3, "smooth": 3,
           "model": 4, "tune": 5, "predict": 6
         } %}
         {% set current_step = step_names.get(page, 1) %}

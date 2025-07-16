@@ -1,82 +1,79 @@
+
 {% extends "regression.html" %}
 
 {% block regression_content %}
 <div class="container py-4">
 
-  <!-- ────────────────────────────────
-       📊  PAGE HEADER & STATUS
-  ─────────────────────────────────── -->
+  <!-- 📊 Page Header -->
   <h2 class="text-primary mb-4">
-      <i class="bi bi-graph-up-arrow me-1"></i> Exploratory Data Analysis
+    <i class="bi bi-graph-up-arrow me-1"></i> Exploratory Data Analysis
   </h2>
 
   {% if error %}
-  <div class="alert alert-warning shadow-sm" role="alert">
-     <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Warning:</strong> {{ error }}
+  <div class="alert alert-warning shadow-sm">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Warning:</strong> {{ error }}
   </div>
   {% endif %}
 
-  <!-- ────────────────────────────────
-       🧾  DATASET OVERVIEW
-  ─────────────────────────────────── -->
-  {% if overview %}
+  <!-- 🧾 Dataset Overview -->
+{% if overview %}
   <div class="card mb-4 shadow-sm border-info">
     <div class="card-header bg-info text-white fw-semibold">
-        <i class="bi bi-table me-1"></i> Dataset Overview
+      <i class="bi bi-table me-1"></i> Dataset Overview
     </div>
     <div class="card-body">
-        <p class="mb-2"><strong>Shape:</strong> {{ overview.shape }}</p>
-        <p class="mb-3"><strong>Rows:</strong> {{ overview.n_rows }} &nbsp;|&nbsp; <strong>Columns:</strong> {{ overview.n_cols }}</p>
+      <p><strong>Shape:</strong> {{ overview.shape }}</p>
+      <p><strong>Rows:</strong> {{ overview.n_rows }} &nbsp;|&nbsp; <strong>Columns:</strong> {{ overview.n_cols }}</p>
+      
+      <!-- Scrollable list if column count is large -->
+      <div style="max-height: 300px; overflow-y: auto;">
         <ul class="list-group list-group-flush">
-            {% for col in overview.columns %}
-            <li class="list-group-item">
-                {{ col.Column }}
-                <code class="text-muted">({{ col.Dtype }})</code>
-            </li>
-            {% endfor %}
+          {% for col in overview.columns %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ col.Column }}
+            <code class="text-muted">{{ col.Dtype }}</code>
+          </li>
+          {% endfor %}
         </ul>
+      </div>
     </div>
   </div>
   {% endif %}
 
-  <!-- ────────────────────────────────
-       🔍  DESCRIBE BUTTON
-  ─────────────────────────────────── -->
+  <!-- 🔍 Describe Button -->
   <form method="post" action="/regression/eda" class="mb-4">
-      <button type="submit" class="btn btn-outline-primary">
-          <i class="bi bi-bar-chart-line me-1"></i> Run Descriptive Statistics
-      </button>
+    <button type="submit" class="btn btn-outline-primary">
+      <i class="bi bi-bar-chart-line me-1"></i> Run Descriptive Statistics
+    </button>
   </form>
 
-  <!-- ────────────────────────────────
-       📈  SUMMARY / MISSING TABLES
-  ─────────────────────────────────── -->
+  <!-- 📈 Summary / Missing -->
   {% if describe %}
   <div class="accordion mb-5" id="describeAccordion">
 
     <!-- Summary -->
     <div class="accordion-item border-success">
-      <h2 class="accordion-header">
-        <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#collapseSummary">
-            <i class="bi bi-clipboard-data me-1"></i> Summary Statistics
+      <h2 class="accordion-header" id="summaryHeading">
+        <button class="accordion-button" data-bs-toggle="collapse" data-bs-target="#collapseSummary" aria-expanded="true">
+          <i class="bi bi-clipboard-data me-2"></i> Summary Statistics
         </button>
       </h2>
       <div id="collapseSummary" class="accordion-collapse collapse show">
-        <div class="accordion-body">
+        <div class="accordion-body overflow-auto" style="max-height: 500px;">
           {{ describe.summary | safe }}
         </div>
       </div>
     </div>
 
-    <!-- Missing -->
+    <!-- Missing Values -->
     <div class="accordion-item border-warning">
-      <h2 class="accordion-header">
+      <h2 class="accordion-header" id="missingHeading">
         <button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapseMissing">
-            <i class="bi bi-question-circle me-1"></i> Missing-Value Report
+          <i class="bi bi-question-circle me-2"></i> Missing Value Report
         </button>
       </h2>
       <div id="collapseMissing" class="accordion-collapse collapse">
-        <div class="accordion-body">
+        <div class="accordion-body overflow-auto" style="max-height: 500px;">
           {{ describe.missing | safe }}
         </div>
       </div>
@@ -85,104 +82,53 @@
   </div>
   {% endif %}
 
-  <!-- ────────────────────────────────
-       🔹  UNIVARIATE PLOTS
-  ─────────────────────────────────── -->
+  <!-- 🔹 Univariate Plots -->
   {% if univariate %}
-  <h4 class="mt-4 mb-3"><i class="bi bi-bar-chart-fill me-1"></i> Univariate Plots</h4>
+  <h4 class="mt-4 mb-3"><i class="bi bi-bar-chart-fill me-2"></i> Univariate Plots</h4>
   <div class="row g-4">
     {% for plot in univariate %}
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm h-100">
-          <iframe src="{{ plot }}" height="400" width="100%" frameborder="0" class="rounded-bottom"></iframe>
-        </div>
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100 plot-hover">
+        <iframe src="{{ plot }}" height="400" width="100%" frameborder="0" class="rounded-bottom"></iframe>
       </div>
+    </div>
     {% endfor %}
   </div>
   {% endif %}
 
-  <!-- ────────────────────────────────
-       🔸  MULTIVARIATE PLOTS
-  ─────────────────────────────────── -->
+  <!-- 🔸 Multivariate Plots -->
   {% if multivariate %}
-  <h4 class="mt-5 mb-3"><i class="bi bi-diagram-2-fill me-1"></i> Multivariate Plots</h4>
+  <h4 class="mt-5 mb-3"><i class="bi bi-diagram-2-fill me-2"></i> Multivariate Plots</h4>
   <div class="row g-4">
     {% for plot in multivariate %}
-      <div class="col-12 col-md-6">
-        <div class="card shadow-sm h-100">
-          {% if plot.endswith('.html') %}
-          <iframe src="{{ plot }}" height="400" width="100%" frameborder="0" class="rounded-bottom"></iframe>
-          {% else %}
-          <img src="{{ plot }}" class="img-fluid rounded-bottom" alt="Multivariate Plot">
-          {% endif %}
-        </div>
+    <div class="col-12 col-md-6">
+      <div class="card shadow-sm h-100 plot-hover">
+        {% if plot.endswith('.html') %}
+        <iframe src="{{ plot }}" height="400" width="100%" frameborder="0" class="rounded-bottom"></iframe>
+        {% else %}
+        <img src="{{ plot }}" class="img-fluid rounded-bottom" alt="Multivariate Plot">
+        {% endif %}
       </div>
+    </div>
     {% endfor %}
   </div>
   {% endif %}
-
-  <!-- ────────────────────────────────
-       🎯  TARGET-BASED VISUALIZATION
-  ─────────────────────────────────── -->
-  <!-- {% if columns %}
-  <div class="card mt-5 shadow-sm border-success">
-    <div class="card-header bg-success text-white fw-semibold">
-        <i class="bi bi-bullseye me-1"></i> Target-Percentile Visualization
-    </div>
-    <div class="card-body"> -->
-
-      <!-- Filter form -->
-      <!-- <form method="post" action="/regression/eda/filter">
-        <div class="row g-3 align-items-end"> -->
-
-          <!-- Target column -->
-          <!-- <div class="col-md-4">
-            <label class="form-label">Target Column</label>
-            <select name="target_column" class="form-select" required>
-              {% for col in columns %}
-              <option value="{{ col }}">{{ col }}</option>
-              {% endfor %}
-            </select>
-          </div> -->
-
-          <!-- Lower -->
-          <!-- <div class="col-md-3">
-            <label class="form-label">Lower Percentile&nbsp;(%)</label>
-            <input type="number" name="lower_percentile"
-                   class="form-control" min="0" max="100" value="25" step="any" required>
-          </div> -->
-
-          <!-- Upper -->
-          <!-- <div class="col-md-3">
-            <label class="form-label">Upper Percentile&nbsp;(%)</label>
-            <input type="number" name="upper_percentile"
-                   class="form-control" min="0" max="100" value="75" step="any" required>
-          </div> -->
-
-          <!-- Submit -->
-          <!-- <div class="col-md-2 d-grid">
-            <button type="submit" class="btn btn-outline-light">
-              <i class="bi bi-eye me-1"></i> Visualize
-            </button>
-          </div>
-
-        </div>
-      </form>
-
+  <!-- 🔍 Plot Zoom Modal -->
+<div class="modal fade" id="plotModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content bg-dark text-white border-0">
+      <div class="modal-header border-0">
+        <h5 class="modal-title">Zoomed Plot</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-0">
+        <iframe id="modalPlotFrame" src="" width="100%" height="600" frameborder="0"></iframe>
+      </div>
     </div>
   </div>
-  {% endif %} -->
-
-  <!-- Embed produced histogram -->
- <!-- {% if target_dist_plot %}
-<div class="card mt-5 shadow-sm border-info">
-    <div class="card-header bg-info text-white fw-bold">📉 Target Column Distribution by Percentile</div>
-    <div class="card-body">
-        <iframe src="{{ target_dist_plot }}" height="450" width="100%" frameborder="0" class="rounded"></iframe>
-    </div>
 </div>
-{% endif %} -->
 
 
 </div>
 {% endblock %}
+

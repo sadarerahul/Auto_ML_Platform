@@ -44,11 +44,13 @@
               <label class="form-check-label text-light">Histogram</label>
             </div>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="plot_types" value="boxplot"
-                     {% if plot_types and 'boxplot' in plot_types %}checked{% endif %}>
-              <label class="form-check-label text-light">Boxplot</label>
+
+              <input class="form-check-input" type="checkbox" name="plot_types" value="lineplot"
+                {% if plot_types and 'lineplot' in plot_types %}checked{% endif %}>
+              <label class="form-check-label text-light">Line Plot</label>
             </div>
-            <small class="text-muted mt-2 d-block">Boxplot is useful for spotting outliers & distribution.</small>
+            <small class="text-muted mt-2 d-block">Line plot is useful for trend or time-based comparison.</small>
+
           </div>
         </div>
 

@@ -80,14 +80,3 @@ def top_features(series: pd.Series, k: int) -> list[str]:
         List of top-k feature names.
     """
     return series.head(k).index.tolist()
-
-# Optional: Mutual Information Variant
-# from sklearn.feature_selection import mutual_info_regression
-# def mutual_info_with_target(target: str) -> pd.Series:
-#     df = load_data().select_dtypes(include="number").dropna()
-#     if target not in df.columns:
-#         raise ValueError(f"Target '{target}' not found.")
-#     X = df.drop(columns=[target])
-#     y = df[target]
-#     mi = mutual_info_regression(X, y)
-#     return pd.Series(mi, index=X.columns).sort_values(ascending=False)
