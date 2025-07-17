@@ -2,48 +2,47 @@ import os
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import plotly.io as pio
 from pathlib import Path
 import re
-from backend.utils.regression.session_state import set_active_dataset, get_active_dataset
 
-pio.templates.default = "plotly_white"
+# Set default Plotly theme
+px.defaults.template = "plotly_white"
 
-PLOTS_DIR = os.path.abspath("frontend/static/plots")
+# ─────────────────────────────
+# 📂 Directory Setup
+# ─────────────────────────────
+PLOTS_DIR = "frontend/static/plots"
+UPLOAD_DIR = "frontend/static/uploads"
 os.makedirs(PLOTS_DIR, exist_ok=True)
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-# ────────────────────────────────────────────────────────────────
-# 📁  Directory setup
-# ────────────────────────────────────────────────────────────────
-PLOT_PATH   = "frontend/static/plots"
-UPLOAD_DIR  = "frontend/static/uploads"
-CLEANED_DIR = "frontend/static/cleaned"
-for d in (PLOT_PATH, UPLOAD_DIR, CLEANED_DIR):
-    os.makedirs(d, exist_ok=True)
-
-# ────────────────────────────────────────────────────────────────
-# 🫼  Helpers
-# ────────────────────────────────────────────────────────────────
+# ─────────────────────────────
+# ✅ Helpers
+# ─────────────────────────────
 def safe_filename(text: str) -> str:
-    """Replace characters that are illegal on Windows or POSIX filesystems."""
+    """Generate a filesystem-safe filename by replacing invalid characters."""
     return re.sub(r'[<>:"/\\|?*]', "_", text)
 
-# ────────────────────────────────────────────────────────────────
-# 📊  Dataset-level helpers
-# ────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────
+# 📊 Dataset Overview
+# ─────────────────────────────
 def dataset_overview(df: pd.DataFrame) -> dict:
+    """Return basic dataset details: shape, columns, dtypes."""
     return {
         "shape": df.shape,
-        "columns": df.dtypes.reset_index()
-                     .rename(columns={"index": "Column", 0: "Dtype"})
-                     .to_dict(orient="records"),
         "n_rows": df.shape[0],
         "n_cols": df.shape[1],
+        "columns": df.dtypes.reset_index()
+                     .rename(columns={"index": "Column", 0: "Dtype"})
+                     .to_dict(orient="records")
     }
 
+
 def describe_data(df: pd.DataFrame):
-    summary          = df.describe().T
+    """Return summary stats and missing value info."""
+    summary = df.describe().T
     summary["median"] = df.median(numeric_only=True)
     try:
         summary["mode"] = df.mode(numeric_only=True).iloc[0]
@@ -51,126 +50,60 @@ def describe_data(df: pd.DataFrame):
         summary["mode"] = np.nan
 
     missing = pd.DataFrame({
-        "missing_count"   : df.isna().sum(),
-        "missing_percent" : df.isna().mean().mul(100)
+        "missing_count": df.isna().sum(),
+        "missing_percent": df.isna().mean() * 100
     })
+
     return summary.round(2), missing.round(2)
 
-# ────────────────────────────────────────────────────────────────
-# 📉  Univariate plots
-# ────────────────────────────────────────────────────────────────
-def generate_univariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str]:
+
+# ─────────────────────────────
+# 📈 Univariate Plots
+# ─────────────────────────────
+def generate_univariate_plots(df: pd.DataFrame, dataset_name: str) -> list:
+    """Generate distribution or count plots for each column."""
     plots = []
-    base  = Path(dataset_name).stem
+    base_name = Path(dataset_name).stem
 
     for col in df.columns:
         if pd.api.types.is_numeric_dtype(df[col]):
-            fig = px.histogram(df, x=col, marginal="box", nbins=30,
+            fig = px.histogram(df, x=col, nbins=30, marginal="box",
                                title=f"Distribution of {col}")
         elif pd.api.types.is_object_dtype(df[col]) or pd.api.types.is_categorical_dtype(df[col]):
-            vc  = df[col].value_counts().reset_index()
+            vc = df[col].value_counts().reset_index()
             vc.columns = [col, "count"]
             fig = px.bar(vc, x=col, y="count", title=f"Count plot of {col}")
         else:
             continue
 
-        safe_col  = safe_filename(col)
-        file_name = f"{base}_univariate_{safe_col}.html"
-        file_path = os.path.join(PLOT_PATH, file_name)
-        fig.write_html(file_path)
-        plots.append(file_path.replace("frontend", ""))
+        safe_col = safe_filename(col)
+        plot_file = os.path.join(PLOTS_DIR, f"{base_name}_uni_{safe_col}.html")
+        fig.write_html(plot_file)
+        plots.append(plot_file.replace("frontend", ""))  # relative path
     return plots
 
-# ────────────────────────────────────────────────────────────────
-# 🔗  Multivariate plots
-# ────────────────────────────────────────────────────────────────
-def generate_multivariate_plots(df: pd.DataFrame, dataset_name: str) -> list[str]:
-    plots    = []
-    base     = Path(dataset_name).stem
+
+# ─────────────────────────────
+# 🔗 Multivariate Plots
+# ─────────────────────────────
+def generate_multivariate_plots(df: pd.DataFrame, dataset_name: str) -> list:
+    """Generate correlation heatmap and pairplot for numeric columns."""
+    plots = []
+    base_name = Path(dataset_name).stem
     num_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
+    # Correlation Heatmap
     if len(num_cols) >= 2:
-        corr = df[num_cols].corr()
-        fig  = px.imshow(corr, text_auto=True, title="Correlation Heatmap")
-        path = os.path.join(PLOT_PATH, f"{base}_correlation.html")
-        fig.write_html(path)
-        plots.append(path.replace("frontend", ""))
+        fig = px.imshow(df[num_cols].corr(), text_auto=True, title="Correlation Heatmap")
+        heatmap_file = os.path.join(PLOTS_DIR, f"{base_name}_correlation.html")
+        fig.write_html(heatmap_file)
+        plots.append(heatmap_file.replace("frontend", ""))
 
+    # Pairplot (only if 2-6 numeric columns)
     if 2 <= len(num_cols) <= 6:
-        fig  = px.scatter_matrix(df, dimensions=num_cols, title="Pairplot Matrix")
-        path = os.path.join(PLOT_PATH, f"{base}_pairplot.html")
-        fig.write_html(path)
-        plots.append(path.replace("frontend", ""))
+        fig = px.scatter_matrix(df, dimensions=num_cols, title="Pairplot Matrix")
+        pairplot_file = os.path.join(PLOTS_DIR, f"{base_name}_pairplot.html")
+        fig.write_html(pairplot_file)
+        plots.append(pairplot_file.replace("frontend", ""))
 
     return plots
-
-# ────────────────────────────────────────────────────────────────
-# 🎯  Percentile filtering helper
-# ────────────────────────────────────────────────────────────────
-def filter_dataset_by_target(
-    df: pd.DataFrame,
-    target_col: str,
-    lower_percentile: float,
-    upper_percentile: float,
-):
-    if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
-        raise ValueError("Percentiles must be between 0 and 100.")
-    if target_col not in df.columns:
-        raise KeyError(f"Target column '{target_col}' not found.")
-
-    lower = df[target_col].quantile(lower_percentile / 100)
-    upper = df[target_col].quantile(upper_percentile / 100)
-    filtered_df = df[df[target_col].between(lower, upper)].copy()
-
-    # ✅ Always save to "<base>_cleaned.csv"
-    current_active = Path(get_active_dataset()).stem
-    base_name = current_active.replace("_cleaned", "")
-    file_name = f"{base_name}_cleaned.csv"
-    cleaned_path = os.path.join(CLEANED_DIR, file_name)
-
-    filtered_df.to_csv(cleaned_path, index=False)
-
-    # ✅ Do NOT set cleaned file as active dataset anymore
-    # set_active_dataset(file_name) ← REMOVED
-
-    shape_str = f"{filtered_df.shape[0]} rows × {filtered_df.shape[1]} columns"
-    return filtered_df, shape_str, file_name
-
-def visualize_target_distribution(
-    df: pd.DataFrame,
-    target_col: str,
-    lower_percentile: float,
-    upper_percentile: float,
-) -> str:
-    if not (0 <= lower_percentile <= 100 and 0 <= upper_percentile <= 100):
-        raise ValueError("Percentiles must be between 0 and 100.")
-    if target_col not in df.columns:
-        raise KeyError(f"Target column '{target_col}' not found.")
-
-    lower = df[target_col].quantile(lower_percentile / 100)
-    upper = df[target_col].quantile(upper_percentile / 100)
-
-    def classify(val):
-        if val < lower:
-            return f"< {lower_percentile}th percentile"
-        elif val > upper:
-            return f"> {upper_percentile}th percentile"
-        else:
-            return f"{lower_percentile}–{upper_percentile}% Range"
-
-    df_plot = df[[target_col]].copy()
-    df_plot["Range"] = df_plot[target_col].apply(classify)
-
-    fig = px.histogram(
-        df_plot,
-        x=target_col,
-        color="Range",
-        nbins=30,
-        title=f"Target Distribution by Percentile: {target_col}",
-        marginal="box"
-    )
-
-    filename = f"{safe_filename(target_col)}_{lower_percentile}_{upper_percentile}_dist.html"
-    filepath = os.path.join(PLOTS_DIR, filename)
-    fig.write_html(filepath)
-    return filepath.replace("frontend", "")  # relative path for iframe

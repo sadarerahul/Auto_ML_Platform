@@ -1,10 +1,14 @@
 {% extends "regression.html" %}
 
 {% block regression_content %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
 <div class="card bg-dark border-secondary shadow-sm">
   <div class="card-body">
     <h4 class="card-title text-info mb-2">📊 Visualize Your Data</h4>
-    <p class="text-muted">Choose <strong>up to 2 numeric columns</strong> and one or more plot types to explore your dataset interactively.</p>
+    <p class="text-muted">
+      Select X and optional Y column for visualization and choose your plot types.
+    </p>
 
     {% if message %}
       <div class="alert alert-{{ message_type or 'info' }} mt-3">{{ message }}</div>
@@ -12,20 +16,31 @@
 
     <form method="post" action="/regression/visualize">
       <div class="row g-4">
-        <!-- Column Selection -->
+        <!-- X Column -->
         <div class="col-md-4">
           <div class="border border-info rounded p-3 h-100 bg-black">
-            <label class="form-label text-light">🧮 Select up to 2 Columns</label>
-            <div class="form-group overflow-auto" style="max-height: 250px;">
+            <label class="form-label text-light">🧮 Select X Column</label>
+            <select class="form-select column-select bg-dark text-light" name="x_column">
+              <option value="">-- Select Column --</option>
               {% for col in numeric_columns %}
-                <div class="form-check">
-                  <input class="form-check-input column-checkbox" type="checkbox" name="selected_columns" value="{{ col }}"
-                         {% if selected_columns and col in selected_columns %}checked{% endif %}>
-                  <label class="form-check-label text-light">{{ col }}</label>
-                </div>
+                <option value="{{ col }}" {% if x_column == col %}selected{% endif %}>{{ col }}</option>
               {% endfor %}
-            </div>
-            <small class="text-muted d-block mt-2">✅ 1 column: Histogram/Boxplot<br>✅ 2 columns: Scatter or Category-wise Boxplot</small>
+            </select>
+            <small class="text-muted d-block mt-2">Required for all plots.</small>
+          </div>
+        </div>
+
+        <!-- Y Column -->
+        <div class="col-md-4">
+          <div class="border border-info rounded p-3 h-100 bg-black">
+            <label class="form-label text-light">🧮 Select Y Column (Optional)</label>
+            <select class="form-select column-select bg-dark text-light" name="y_column">
+              <option value="">-- Select Column --</option>
+              {% for col in numeric_columns %}
+                <option value="{{ col }}" {% if y_column == col %}selected{% endif %}>{{ col }}</option>
+              {% endfor %}
+            </select>
+            <small class="text-muted d-block mt-2">Required for Scatter or Line plots.</small>
           </div>
         </div>
 
@@ -33,39 +48,38 @@
         <div class="col-md-4">
           <div class="border border-info rounded p-3 h-100 bg-black">
             <label class="form-label text-light">📐 Select Plot Type(s)</label>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="plot_types" value="scatter"
+            <div class="btn-group d-flex flex-wrap" role="group">
+              <input type="checkbox" class="btn-check" name="plot_types" value="scatter" id="scatter"
                      {% if plot_types and 'scatter' in plot_types %}checked{% endif %}>
-              <label class="form-check-label text-light">Scatter Plot</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="plot_types" value="histogram"
+              <label class="btn btn-outline-info m-1" for="scatter">Scatter</label>
+
+              <input type="checkbox" class="btn-check" name="plot_types" value="histogram" id="histogram"
                      {% if plot_types and 'histogram' in plot_types %}checked{% endif %}>
-              <label class="form-check-label text-light">Histogram</label>
-            </div>
-            <div class="form-check">
+              <label class="btn btn-outline-info m-1" for="histogram">Histogram</label>
 
-              <input class="form-check-input" type="checkbox" name="plot_types" value="lineplot"
-                {% if plot_types and 'lineplot' in plot_types %}checked{% endif %}>
-              <label class="form-check-label text-light">Line Plot</label>
+              <input type="checkbox" class="btn-check" name="plot_types" value="lineplot" id="lineplot"
+                     {% if plot_types and 'lineplot' in plot_types %}checked{% endif %}>
+              <label class="btn btn-outline-info m-1" for="lineplot">Line Plot</label>
             </div>
-            <small class="text-muted mt-2 d-block">Line plot is useful for trend or time-based comparison.</small>
-
+            <small class="text-muted mt-2 d-block">Line plot is useful for trends or time-series data.</small>
           </div>
         </div>
 
-        <!-- Optional Limit -->
+        <!-- Scatter Limit -->
         <div class="col-md-4">
           <div class="border border-info rounded p-3 h-100 bg-black">
             <label class="form-label text-light">🔢 Limit (for Scatter Plot)</label>
             <input type="number" class="form-control bg-dark text-light border-info" name="scatter_limit"
                    value="{{ scatter_limit or 100 }}" min="10" step="10">
-            <small class="text-muted d-block mt-2">Limits the number of points in scatter plot (default: 100).</small>
+            <small class="text-muted d-block mt-2">
+              Limits number of points in scatter plot (default: 100).
+            </small>
           </div>
         </div>
       </div>
 
-      <div class="mt-4 text-end">
+      <div class="mt-4 d-flex justify-content-between">
+        <a href="/regression/visualize" class="btn btn-outline-warning">🔄 Reset</a>
         <button class="btn btn-outline-info px-4" type="submit">📈 Generate Visualizations</button>
       </div>
     </form>
@@ -83,16 +97,36 @@
   </div>
 </div>
 
-<!-- JS: Enforce Max 2 Column Selection -->
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
-  document.querySelectorAll('.column-checkbox').forEach(cb => {
-    cb.addEventListener('change', () => {
-      const checked = document.querySelectorAll('.column-checkbox:checked');
-      if (checked.length > 2) {
-        cb.checked = false;
-        alert("You can only select up to 2 columns.");
-      }
+  $(document).ready(function() {
+    $('.column-select').select2({
+      theme: 'classic',
+      width: '100%',
+      placeholder: 'Select column'
     });
   });
 </script>
+
+<!-- Dark Theme for Select2 -->
+<style>
+  .select2-container--classic .select2-selection--single {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #17a2b8;
+  }
+  .select2-container--classic .select2-dropdown {
+    background-color: #1e1e1e;
+    color: #fff;
+  }
+  .select2-results__option {
+    color: #fff;
+  }
+  .select2-results__option--highlighted {
+    background-color: #17a2b8;
+    color: #000;
+  }
+</style>
 {% endblock %}

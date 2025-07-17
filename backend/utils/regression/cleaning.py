@@ -14,11 +14,26 @@ os.makedirs(CLEANED_DIR, exist_ok=True)
 
 # 🔄 Load latest version of dataset (cleaned > raw fallback)
 def load_data():
-    path = get_processing_dataset_path()
-    print("[DEBUG] Loading data from:", path)
-    if os.path.exists(path):
-        return pd.read_csv(path)
+    """Always load the correct dataset based on active dataset and cleaned file availability."""
+    active_file = get_active_dataset()
+    if not active_file:
+        return pd.DataFrame()
+
+    active_path = get_active_dataset_path()
+    cleaned_name = active_file.replace(".csv", "_cleaned.csv")
+    cleaned_path = os.path.join(CLEANED_DIR, cleaned_name)
+
+    # ✅ If cleaned version exists, use it; else fallback to active file
+    if os.path.exists(cleaned_path):
+        print(f"[DEBUG] Loading data from cleaned version: {cleaned_path}")
+        return pd.read_csv(cleaned_path)
+
+    if os.path.exists(active_path):
+        print(f"[DEBUG] Loading data from active dataset: {active_path}")
+        return pd.read_csv(active_path)
+
     return pd.DataFrame()
+
 
 # 💾 Save cleaned data securely
 def save_data(df: pd.DataFrame):

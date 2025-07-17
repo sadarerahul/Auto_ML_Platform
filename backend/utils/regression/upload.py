@@ -4,9 +4,10 @@ from io import BytesIO
 from fastapi import UploadFile
 from fastapi.templating import Jinja2Templates
 import logging
+import glob
 
 # Import centralized dataset state functions
-from  backend.utils.regression.session_state import (
+from backend.utils.regression.session_state import (
     set_active_dataset,
     get_active_dataset,
     get_active_dataset_path,
@@ -25,13 +26,14 @@ PREDICTIONS_DIR = os.path.join(FRONTEND_DIR, "static", "predictions")
 MODELS_DIR = os.path.join(FRONTEND_DIR, "static", "models")
 SPLIT_DIR = os.path.join(FRONTEND_DIR, "static", "splits")
 PLOTS_DIR = os.path.join(FRONTEND_DIR, "static", "plots")
+STATE_DIR = os.path.join(BASE_DIR, "state")  # For visualization JSON
 
 TEMPLATE_DIR = os.path.join(FRONTEND_DIR, "templates")
 
 # ✅ Ensure all required folders exist
 for folder in [
     UPLOAD_DIR, CLEANED_DATA_DIR, PROCESSED_DIR,
-    PREDICTIONS_DIR, MODELS_DIR, SPLIT_DIR, PLOTS_DIR
+    PREDICTIONS_DIR, MODELS_DIR, SPLIT_DIR, PLOTS_DIR, STATE_DIR
 ]:
     os.makedirs(folder, exist_ok=True)
 
@@ -139,9 +141,6 @@ def delete_related_split_files(dataset_name: str):
 
 def delete_related_plot_files(dataset_name: str):
     base = os.path.splitext(dataset_name)[0]
-    if base.endswith("_cleaned"):
-        base = base.replace("_cleaned", "")
-
     for f in os.listdir(PLOTS_DIR):
         if f.startswith(base):
             try:
@@ -161,6 +160,16 @@ def delete_cleaned_version(dataset_name: str):
         except Exception as e:
             print(f"⚠️ Could not delete cleaned file {cleaned_file}: {e}")
 
+def delete_visualization_state(dataset_name: str):
+    base = os.path.splitext(dataset_name)[0]
+    json_pattern = os.path.join(STATE_DIR, f"{base}*.json")
+    for f in glob.glob(json_pattern):
+        try:
+            os.remove(f)
+            print(f"🗑️ Deleted visualization state: {os.path.basename(f)}")
+        except Exception as e:
+            print(f"⚠️ Could not delete visualization state {f}: {e}")
+
 def clear_all_cache_for(filename: str):
     delete_related_processed_files(filename)
     delete_related_prediction_files(filename)
@@ -168,3 +177,25 @@ def clear_all_cache_for(filename: str):
     delete_related_split_files(filename)
     delete_related_plot_files(filename)
     delete_cleaned_version(filename)
+    delete_visualization_state(filename)
+
+def delete_dataset_completely(filename: str):
+    """Delete dataset and all related files."""
+    try:
+        raw_path = os.path.join(UPLOAD_DIR, filename)
+        if os.path.exists(raw_path):
+            os.remove(raw_path)
+            print(f"🗑️ Deleted raw dataset: {filename}")
+
+        clear_all_cache_for(filename)
+
+        # Clear active dataset if it matches
+        active = get_active_dataset()
+        if active == filename:
+            set_active_dataset("")
+            print("✅ Active dataset cleared.")
+
+        return True
+    except Exception as e:
+        print(f"❌ Error deleting dataset {filename}: {e}")
+        return False

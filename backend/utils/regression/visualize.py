@@ -1,12 +1,17 @@
-import os
 import pandas as pd
 import plotly.express as px
 from plotly.io import to_html
 from .cleaning import load_data as _load_data
 
 
+# Load Data
+def load_cleaned_data() -> pd.DataFrame:
+    """Return the cleaned dataset currently being processed."""
+    return _load_data()
+
+
 def get_numeric_columns() -> list:
-    """Return numeric columns from the cleaned dataset currently being processed."""
+    """Return numeric columns from the cleaned dataset."""
     try:
         df = _load_data()
         return df.select_dtypes(include="number").columns.tolist()
@@ -14,32 +19,10 @@ def get_numeric_columns() -> list:
         return []
 
 
-def load_cleaned_data() -> pd.DataFrame:
-    """Return the cleaned dataset currently being processed."""
-    return _load_data()
-
-
 # ---------- Visualization Helpers ----------
-
-def make_scatter(df, column: str, limit: int = 100, dark=False) -> str:
-    if column not in df.columns:
-        return f"<p class='text-danger'>Column '{column}' not found in dataset.</p>"
-
-    data = df if limit is None else df.head(limit)
-    fig = px.scatter(
-        data,
-        y=column,
-        title=f"Scatter: Index vs {column}",
-        template="plotly_dark" if dark else "plotly_white"
-    )
-    fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
-    return to_html(fig, full_html=False)
-
-
 def make_histogram(df, column: str, bins: int = 20, dark=False) -> str:
     if column not in df.columns:
         return f"<p class='text-danger'>Column '{column}' not found in dataset.</p>"
-
     fig = px.histogram(
         df,
         x=column,
@@ -51,82 +34,41 @@ def make_histogram(df, column: str, bins: int = 20, dark=False) -> str:
     return to_html(fig, full_html=False)
 
 
-def make_lineplot(df, column: str, limit: int = 100, dark=False) -> str:
-    if column not in df.columns:
-        return f"<p class='text-danger'>Column '{column}' not found in dataset.</p>"
-    
-    data = df if limit is None else df.head(limit)
-    fig = px.line(
-        data,
-        x=data.index,
-        y=column,
-        title=f"Line Plot: Index vs {column}",
-        labels={'x': 'Index', column: column},
-        template="plotly_dark" if dark else "plotly_white"
-    )
-    fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
-    return to_html(fig, full_html=False)
-
-
-def make_two_column_scatter(df, x_col: str, y_col: str, limit: int = 100, dark=False) -> str:
+def make_scatter(df, x_col: str, y_col: str, limit: int = 100, dark=False) -> str:
     if x_col not in df.columns or y_col not in df.columns:
         return f"<p class='text-danger'>One or both columns not found: {x_col}, {y_col}</p>"
-
     data = df if limit is None else df.head(limit)
     fig = px.scatter(
         data,
         x=x_col,
         y=y_col,
-        title=f"{x_col} vs {y_col}",
+        title=f"Scatter Plot: {y_col} vs {x_col}",
         template="plotly_dark" if dark else "plotly_white"
     )
     fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
     return to_html(fig, full_html=False)
 
 
-def make_two_column_histograms(df, cols: list, dark=False) -> list:
-    plots = []
-    for col in cols:
-        if col not in df.columns:
-            plots.append(f"<p class='text-danger'>Column '{col}' not found.</p>")
-            continue
-        fig = px.histogram(
-            df,
-            x=col,
-            nbins=20,
-            title=f"Histogram of {col}",
-            template="plotly_dark" if dark else "plotly_white"
-        )
-        fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
-        plots.append(to_html(fig, full_html=False))
-    return plots
-
-
-def make_two_column_lineplot(df, cols: list, limit: int = 100, dark=False) -> list:
-    plots = []
+def make_single_column_line(df, column: str, limit: int = 100, dark=False) -> str:
+    """Creates a line plot of a single column against its index."""
+    if column not in df.columns:
+        return f"<p class='text-danger'>Column '{column}' not found.</p>"
     data = df if limit is None else df.head(limit)
-    for col in cols:
-        if col not in df.columns:
-            plots.append(f"<p class='text-danger'>Column '{col}' not found.</p>")
-            continue
-        fig = px.line(
-            data,
-            x=data.index,
-            y=col,
-            title=f"Line Plot: Index vs {col}",
-            labels={'x': 'Index', col: col},
-            template="plotly_dark" if dark else "plotly_white"
-        )
-        fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
-        plots.append(to_html(fig, full_html=False))
-    return plots
+    fig = px.line(
+        data,
+        x=data.index,
+        y=column,
+        title=f"Line Plot of {column} (Index vs {column})",
+        template="plotly_dark" if dark else "plotly_white"
+    )
+    fig.update_layout(margin=dict(t=40, l=40, r=20, b=40))
+    return to_html(fig, full_html=False)
 
 
-# ---------- Main Generator ----------
-
-def generate_visualizations(selected_columns: list, plot_types: list, scatter_limit: int = 100, dark=True) -> list:
+# ---------- Main Visualization Generator ----------
+def generate_visualizations(x_col: str, y_col: str, plot_types: list, scatter_limit: int = 100, dark=True) -> list:
     """
-    Generate Plotly HTML charts based on selected columns and plot types.
+    Generate visualizations based on X column, optional Y column, and selected plot types.
     Supported plot_types: 'scatter', 'histogram', 'lineplot'
     """
     try:
@@ -136,25 +78,25 @@ def generate_visualizations(selected_columns: list, plot_types: list, scatter_li
 
         plots = []
 
-        if len(selected_columns) == 1:
-            col = selected_columns[0]
-            if "scatter" in plot_types:
-                plots.append(make_scatter(df, col, scatter_limit, dark))
-            if "histogram" in plot_types:
-                plots.append(make_histogram(df, col, dark=dark))
-            if "lineplot" in plot_types:
-                plots.append(make_lineplot(df, col, scatter_limit, dark))
+        # Validate X column
+        if not x_col or x_col not in df.columns:
+            return ["<p class='text-danger'>❌ Please select a valid X column.</p>"]
 
-        elif len(selected_columns) == 2:
-            col1, col2 = selected_columns
-            if "scatter" in plot_types:
-                plots.append(make_two_column_scatter(df, col1, col2, scatter_limit, dark))
-            if "histogram" in plot_types:
-                plots.extend(make_two_column_histograms(df, [col1, col2], dark))
-            if "lineplot" in plot_types:
-                plots.extend(make_two_column_lineplot(df, [col1, col2], scatter_limit, dark))
+        # Histogram for X column
+        if "histogram" in plot_types:
+            plots.append(make_histogram(df, x_col, dark=dark))
 
-        return plots
+        # Scatter Plot if Y provided
+        if y_col and y_col in df.columns and "scatter" in plot_types:
+            plots.append(make_scatter(df, x_col, y_col, scatter_limit, dark))
+
+        # Line Plots: ONLY separate line plots for each selected column
+        if "lineplot" in plot_types:
+            plots.append(make_single_column_line(df, x_col, scatter_limit, dark))
+            if y_col and y_col in df.columns:
+                plots.append(make_single_column_line(df, y_col, scatter_limit, dark))
+
+        return plots if plots else ["<p class='text-info'>ℹ️ No plots generated. Please select plot type(s).</p>"]
 
     except Exception as e:
         return [f"<p class='text-danger'>Error generating plots: {e}</p>"]

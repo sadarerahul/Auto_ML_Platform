@@ -67,6 +67,7 @@ def perform_split(test_size: float, random_state: int, preview_rows: int = 5) ->
             "y_test": y_test.shape,
         }
     }
+
 def perform_sequential_split(test_size: float, preview_rows: int = 5) -> dict:
     xy = load_xy()
     if not xy["X"] or not xy["y"]:

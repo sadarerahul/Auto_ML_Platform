@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 import os
 from typing import Optional
 
+from backend.utils.regression.session_state import get_active_dataset
 from backend.utils.regression.context import get_sidebar_context
 from backend.utils.regression import train_test_split as tts
 from backend.utils.regression.selection_state import load_xy
@@ -17,7 +18,7 @@ templates = Jinja2Templates(directory=TEMPLATE_DIR)
 @router.get("/regression/split", response_class=HTMLResponse)
 async def split_page(request: Request):
     files = dataset_service.list_files()
-    active = files[-1] if files else None
+    active = get_active_dataset()
     xy_state = load_xy()
 
     return templates.TemplateResponse(
